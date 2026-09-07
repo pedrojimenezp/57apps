@@ -1,0 +1,916 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reformas Nature Bio — Torre 4</title>
+<meta name="description" content="Herramienta no oficial para entender las opciones de reforma del proyecto Nature Bio, Torre 4: qué trae por defecto tu apartamento, qué cambia con cada mejora y cuánto suma o resta tu selección.">
+<meta name="robots" content="index,follow">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --brand:#1B4E8C; --brand-2:#2C6BB5; --brand-soft:#E4EDF7;
+  --ground:#F1F4F8; --surface:#FFFFFF; --surface-2:#F7F9FB;
+  --ink:#14202B; --ink-2:#52626F; --ink-3:#84939F;
+  --line:#D5DEE6; --line-2:#E7ECF1;
+  --si:#1F6B4A; --si-soft:#DCEDE4;
+  --quiza:#8A6410; --quiza-soft:#F5EBD3;
+  --no:#84939F; --no-soft:#E7ECF1;
+  --minus:#9C3A2E; --minus-soft:#F6E4E1;
+  --alert:#FFC53D; --alert-ink:#2A1F00; --alert-edge:#B07E00;
+  --shadow:0 1px 2px rgba(20,32,43,.07);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --brand:#6FA8E0; --brand-2:#8DBCEA; --brand-soft:#1B2C3D;
+    --ground:#12181F; --surface:#1A2129; --surface-2:#212A33;
+    --ink:#E6EBF0; --ink-2:#9DAAB6; --ink-3:#6E7C88;
+    --line:#2C3742; --line-2:#242E38;
+    --si:#6FC79B; --si-soft:#163023;
+    --quiza:#D9B15A; --quiza-soft:#332913;
+    --no:#6E7C88; --no-soft:#242E38;
+    --minus:#E0857A; --minus-soft:#33201D;
+    --alert:#FFC53D; --alert-ink:#2A1F00; --alert-edge:#8A6400;
+    --shadow:0 1px 2px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --brand:#6FA8E0; --brand-2:#8DBCEA; --brand-soft:#1B2C3D;
+  --ground:#12181F; --surface:#1A2129; --surface-2:#212A33;
+  --ink:#E6EBF0; --ink-2:#9DAAB6; --ink-3:#6E7C88;
+  --line:#2C3742; --line-2:#242E38;
+  --si:#6FC79B; --si-soft:#163023;
+  --quiza:#D9B15A; --quiza-soft:#332913;
+  --no:#6E7C88; --no-soft:#242E38;
+  --minus:#E0857A; --minus-soft:#33201D;
+  --alert:#FFC53D; --alert-ink:#2A1F00; --alert-edge:#8A6400;
+  --shadow:0 1px 2px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--ground); color:var(--ink); margin:0;
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:980px; margin:0 auto; padding:0 20px 90px}
+
+/* ============ BANNER ============ */
+.alert{
+  background:var(--alert); color:var(--alert-ink);
+  border-bottom:4px solid var(--alert-edge);
+}
+.alert-in{max-width:980px; margin:0 auto; padding:20px 20px 22px; display:flex; gap:16px; align-items:flex-start}
+.alert-mk{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif;
+  font-weight:700; font-size:34px; line-height:1; flex:none; padding-top:2px;
+}
+.alert h2{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif;
+  font-weight:700; font-size:clamp(19px,3.2vw,24px); line-height:1.2;
+  margin:0 0 8px; letter-spacing:-.01em; text-wrap:balance;
+}
+.alert p{margin:0 0 6px; font-size:14.5px; line-height:1.5; max-width:74ch}
+.alert p:last-child{margin-bottom:0}
+.alert b{font-weight:600}
+.alert .strong{
+  font-weight:600; border-top:1px solid rgba(42,31,0,.28);
+  margin-top:10px; padding-top:9px;
+}
+
+/* ============ MASTHEAD ============ */
+.masthead{padding:32px 0 20px; border-bottom:2px solid var(--ink)}
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-3); margin:0 0 10px;
+}
+h1{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif;
+  font-weight:700; font-size:clamp(28px,5vw,42px); line-height:1.05;
+  letter-spacing:-.015em; margin:0 0 14px; text-wrap:balance;
+}
+.lede{max-width:64ch; color:var(--ink-2); font-size:14.5px; margin:0}
+
+/* ============ SELECTOR ============ */
+.picker{
+  background:var(--brand); color:#fff; margin:22px 0 0;
+  display:flex; flex-wrap:wrap; align-items:flex-end; gap:18px; padding:16px 18px;
+}
+:root[data-theme="dark"] .picker,
+:root:not([data-theme="light"]) .picker{color:#0E1722}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .picker{color:#fff}}
+.picker label{display:block}
+.picker .lab{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10px;
+  letter-spacing:.12em; text-transform:uppercase; opacity:.85;
+  display:block; margin-bottom:5px;
+}
+.picker select{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:15px; font-weight:500;
+  background:var(--surface); color:var(--ink); border:1px solid var(--line);
+  border-radius:2px; padding:7px 10px; min-width:110px;
+}
+.picker .hint{
+  flex:1 1 200px; font-size:12.5px; line-height:1.45; opacity:.92; min-width:180px;
+}
+.picker .hint b{font-weight:600}
+
+/* ============ TALLY ============ */
+.tally{position:sticky; top:0; z-index:30; margin:0; box-shadow:var(--shadow)}
+.tally-grid{
+  display:grid; grid-template-columns:repeat(3,1fr) auto;
+  gap:1px; background:var(--line); border:1px solid var(--line); border-top:none;
+}
+@media (max-width:700px){.tally-grid{grid-template-columns:repeat(3,1fr)}}
+.tally-grid>div{background:var(--surface); padding:11px 15px}
+.tally .lab{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10px;
+  letter-spacing:.11em; text-transform:uppercase; color:var(--ink-3);
+  display:block; margin-bottom:3px;
+}
+.tally .fig{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:16px; font-weight:500; font-variant-numeric:tabular-nums;
+  letter-spacing:-.02em; display:block;
+}
+.fig.plus{color:var(--si)} .fig.less{color:var(--minus)}
+.tally .acts{display:flex; align-items:center; gap:7px; flex-wrap:wrap}
+@media (max-width:700px){.tally .acts{grid-column:1/-1}}
+.tally-note{
+  background:var(--alert); color:var(--alert-ink);
+  font-size:12px; font-weight:600; text-align:center;
+  padding:5px 15px; border:1px solid var(--alert-edge); border-top:none;
+}
+
+button{font:inherit; cursor:pointer}
+.btn{
+  background:var(--surface-2); color:var(--ink); border:1px solid var(--line);
+  border-radius:2px; padding:6px 11px; font-size:12.5px; font-weight:500;
+  transition:background .12s,border-color .12s;
+}
+.btn:hover{background:var(--ground); border-color:var(--ink-3)}
+.btn.primary{background:var(--brand); color:var(--surface); border-color:var(--brand)}
+.btn.primary:hover{background:var(--brand-2); border-color:var(--brand-2)}
+:focus-visible{outline:2px solid var(--brand); outline-offset:2px}
+
+/* ============ SECTIONS ============ */
+.sec{margin:38px 0 0}
+.sec-head{display:flex; align-items:baseline; gap:12px; margin:0 0 4px; flex-wrap:wrap}
+.sec-head h2{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif;
+  font-weight:700; font-size:22px; letter-spacing:-.01em; margin:0;
+}
+.sec-head .n{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px;
+  color:var(--ink-3); letter-spacing:.06em;
+}
+.sec-sub{color:var(--ink-2); font-size:13.5px; margin:0 0 16px; max-width:64ch}
+
+.explain{
+  background:var(--brand-soft); border-left:3px solid var(--brand);
+  padding:16px 18px; margin:26px 0 0;
+}
+.explain h2{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif;
+  font-size:17px; font-weight:700; margin:0 0 8px;
+}
+.explain p{margin:0 0 8px; font-size:13.5px; color:var(--ink-2); max-width:70ch}
+.explain p:last-child{margin-bottom:0}
+.explain b{color:var(--ink); font-weight:600}
+
+/* ============ ITEM ============ */
+.item{background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--line); margin-bottom:12px}
+.item[data-d="si"]{border-left-color:var(--si)}
+.item[data-d="quiza"]{border-left-color:var(--quiza)}
+.item[data-d="no"]{border-left-color:var(--no); opacity:.6}
+.item.blocked{opacity:.5}
+.item-top{display:flex; flex-wrap:wrap; align-items:flex-start; gap:9px 16px; padding:13px 16px 11px}
+.code{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12px; font-weight:600;
+  color:var(--brand); letter-spacing:.02em; padding-top:2px; min-width:38px;
+}
+.item.neg .code{color:var(--minus)}
+.name{flex:1 1 240px; min-width:0}
+.name h3{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif;
+  font-weight:600; font-size:17.5px; margin:0; line-height:1.25; letter-spacing:-.005em;
+}
+.price{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:15px; font-weight:500;
+  font-variant-numeric:tabular-nums; white-space:nowrap; padding-top:1px;
+}
+.item.neg .price{color:var(--minus)}
+
+.vs{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line-2);
+    border-top:1px solid var(--line-2); border-bottom:1px solid var(--line-2)}
+@media (max-width:640px){.vs{grid-template-columns:1fr}}
+.vs>div{background:var(--surface); padding:12px 16px}
+.vs .h{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10px;
+  letter-spacing:.11em; text-transform:uppercase; margin:0 0 6px;
+}
+.vs .base .h{color:var(--ink-3)}
+.vs .up .h{color:var(--brand)}
+.item.neg .vs .up .h{color:var(--minus)}
+.vs p{margin:0; font-size:13.5px; color:var(--ink-2); line-height:1.5}
+.vs .up p{color:var(--ink)}
+.nd{font-style:italic; color:var(--ink-3)}
+
+.chips{display:flex; flex-wrap:wrap; gap:5px; margin-top:9px}
+.chip{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10.5px;
+  background:var(--brand-soft); color:var(--brand); padding:2.5px 7px; border-radius:2px;
+}
+.item.neg .chip{background:var(--minus-soft); color:var(--minus)}
+.chip.mute{background:var(--no-soft); color:var(--ink-2)}
+
+.flag{
+  display:flex; gap:9px; align-items:flex-start; padding:9px 16px;
+  font-size:12.5px; line-height:1.45; background:var(--surface-2);
+  color:var(--ink-2); border-top:1px solid var(--line-2);
+}
+.flag b{color:var(--ink); font-weight:600}
+.flag .mk{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10.5px; font-weight:600;
+  color:var(--brand); flex:none; padding-top:2px; letter-spacing:.05em;
+}
+.flag.warn{background:var(--quiza-soft)} .flag.warn .mk{color:var(--quiza)}
+.flag.warn b{color:var(--quiza)}
+.flag.stop{background:var(--minus-soft)} .flag.stop .mk{color:var(--minus)}
+.flag.stop b{color:var(--minus)}
+.flag .fix{
+  background:transparent; border:1px solid currentColor; color:inherit;
+  border-radius:2px; padding:2px 8px; font-size:11.5px; font-weight:600; margin-left:auto; flex:none;
+}
+
+.decide{display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:10px 16px; border-top:1px solid var(--line-2)}
+.seg{display:inline-flex; border:1px solid var(--line); border-radius:2px; overflow:hidden}
+.seg button{
+  background:var(--surface); color:var(--ink-2); border:none; padding:5px 14px;
+  font-size:12.5px; font-weight:500; border-right:1px solid var(--line); transition:background .1s,color .1s;
+}
+.seg button:last-child{border-right:none}
+.seg button:hover{background:var(--surface-2)}
+.seg button[aria-pressed="true"]{font-weight:600}
+.seg button[data-v="si"][aria-pressed="true"]{background:var(--si-soft); color:var(--si)}
+.seg button[data-v="quiza"][aria-pressed="true"]{background:var(--quiza-soft); color:var(--quiza)}
+.seg button[data-v="no"][aria-pressed="true"]{background:var(--no-soft); color:var(--ink-2)}
+.note{
+  flex:1 1 200px; min-width:140px; background:transparent; border:none;
+  border-bottom:1px dashed var(--line); color:var(--ink); font:inherit; font-size:12.5px; padding:4px 2px;
+}
+.note::placeholder{color:var(--ink-3)}
+.note:focus{outline:none; border-bottom-color:var(--brand)}
+
+/* ============ BLOCKS ============ */
+.block{background:var(--surface); border:1px solid var(--line); padding:20px 22px; margin-top:14px}
+.block h3{font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif; font-weight:700; font-size:18px; margin:0 0 6px}
+.block p{color:var(--ink-2); font-size:13.5px; max-width:68ch; margin:0 0 10px}
+.block p:last-child{margin-bottom:0}
+.block b{color:var(--ink); font-weight:600}
+.block ul{margin:12px 0 0; padding:0; list-style:none}
+.block li{padding:9px 0; border-top:1px solid var(--line-2); font-size:13.5px; display:flex; gap:14px; flex-wrap:wrap}
+.block li b{flex:0 0 auto; font-weight:600}
+.block li span{color:var(--ink-2); flex:1 1 260px}
+.foot{
+  margin-top:32px; padding-top:16px; border-top:1px solid var(--line); font-size:12px;
+  color:var(--ink-3); font-family:"IBM Plex Mono",ui-monospace,monospace; line-height:1.75;
+}
+.foot a{color:var(--brand)}
+
+@media print{
+  .no-print{display:none!important}
+  body{background:#fff; font-size:11pt}
+  .alert{background:#FFC53D!important; color:#000!important; -webkit-print-color-adjust:exact; print-color-adjust:exact}
+  .tally{position:static}
+  .seg button[aria-pressed="false"]{display:none}
+  .seg{border:none}
+  .seg button[aria-pressed="true"]{border:1px solid #999}
+  .note{border-bottom:none}
+  .item{break-inside:avoid; opacity:1!important}
+  .flag .fix{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="alert" role="alert">
+  <div class="alert-in">
+    <span class="alert-mk" aria-hidden="true">!</span>
+    <div>
+      <h2>Confirma todo con tu asesor antes de decidir cualquier cosa</h2>
+      <p>Los precios de esta página salen de la <b>lista de 2023</b> y es muy probable que ya hayan cambiado.</p>
+      <p>Esta es una herramienta <b>no oficial</b>, hecha para entender qué significa cada ítem y darte un <b>estimado aproximado</b>. No es una cotización.</p>
+      <p>El precio y las condiciones finales <b>los define únicamente la constructora</b>.</p>
+      <p class="strong">Antes de decidir, comprometerte o firmar cualquier cosa, verifica cada ítem y cada valor con tu asesor comercial del proyecto.</p>
+    </div>
+  </div>
+</div>
+
+<div class="wrap"><div id="app"></div></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------------------------------------------------------
+   Precios transcritos de "TIPOLOGIAS REFORMAS BIO T4 PRECIOS 2023
+   (Ver 1).xlsx". Orden de las columnas:
+     0  TIPO 21 Y 22  PISO 4 AL 23
+     1  TIPO 21 Y 22  PISO 3
+     2  TIPO 20 Y 23  PISO 4 AL 28
+     3  TIPO 20 Y 23  PISO 3
+     4  TIPO 19 Y 24  PISO 3 AL 28
+     5  TIPO 21 Y 22  PISO 24 AL 28
+   null = el item no aplica a esa tipologia (N/A en la hoja).
+   Las descripciones son identicas en las 6 hojas; solo cambia el precio.
+----------------------------------------------------------------*/
+var SHEETS = [
+  "Tipo 21 y 22 · Piso 4 al 23",
+  "Tipo 21 y 22 · Piso 3",
+  "Tipo 20 y 23 · Piso 4 al 28",
+  "Tipo 20 y 23 · Piso 3",
+  "Tipo 19 y 24 · Piso 3 al 28",
+  "Tipo 21 y 22 · Piso 24 al 28"
+];
+
+function sheetFor(tipo, piso){
+  if(tipo===19 || tipo===24) return 4;
+  if(tipo===20 || tipo===23) return piso===3 ? 3 : 2;
+  /* 21 y 22 */
+  if(piso===3) return 1;
+  return piso>=24 ? 5 : 0;
+}
+
+var P = {
+ "2.01":[3657091,3657091,3177086,3177086,3567897,3859995],
+ "2.02":[1139564,1139564,949303,949303,1113344,1165005],
+ "3.01":[4804173,4804173,4572647,4572647,4630528,4804173],
+ "3.02":[6409251,6409251,5812079,5812079,6168555,6409251],
+ "3.03":[1090811,1090811,null,null,916281,1090811],
+ "5.01":[853583,null,853583,null,853583,853583],
+ "5.02":[null,1066979,null,1066979,null,null],
+ "5.03":[586354,586354,586354,586354,586354,586354],
+ "5.04":[586354,586354,586354,586354,586354,586354],
+ "6.01":[143355,143355,143355,143355,143355,143355],
+ "6.02":[686166,686166,686166,686166,686166,686166],
+ "7.01":[4125363,4125363,4055881,4055881,4058040,4152896],
+ "7.02":[4008408,4008408,4032409,4032409,4059813,4026763],
+ "8.01":[-428602,-428602,-428602,-428602,-428602,-428602],
+ "8.02":[-428602,-428602,-428602,-428602,-428602,-428602],
+ "8.03":[-428602,-428602,-428602,-428602,-428602,-428602],
+ "8.04":[-426996,-426996,-426996,-426996,-426996,-426996],
+ "8.05":[-426996,-426996,-426996,-426996,-426996,-426996],
+ "8.06":[-426996,-426996,null,null,-426996,-426996],
+ "8.07":[-942480,-942480,-942480,-942480,-942480,-942480],
+ "8.08":[null,null,-1721127,-1721127,null,null],
+ "8.09":[-1097838,-1097838,-1147418,-1147418,-1055342,-1097838],
+ "8.10":[-956182,-956182,-1147418,-1147418,-956182,-956182],
+ "8.11":[-1129559,-1129559,null,null,-1005772,-1129559],
+ "8.12":[-11862153,-11862153,-10606266,-10606266,-11325697,-11862153],
+ "8.13":[-4344773,-4344773,-3429133,-3429133,-4025392,-4344773],
+ "8.14":[-2165606,-2165606,-1862527,-1862527,-2101350,-2271753],
+ "8.15":[-3946191,-3946191,-3957326,-3957326,-3917057,-3948623],
+ "8.16":[-3885079,-3885079,-3959043,-3959043,-3913032,-3886700],
+ "8.17":[-8765161,-8765161,-7883942,-7883942,-8412641,-8765161],
+ "8.18":[-455280,-455280,-455280,-455280,-455280,-455280],
+ "8.19":[-532041,-532041,-532041,-532041,-532041,-532041],
+ "8.20":[-29566627,-29566627,-28475874,-28475874,-28747005,-29681798],
+ "8.21":[-1784620,-1784620,-1148518,-1148518,-1616760,-1784620]
+};
+
+var ITEMS = [
+/* ------------------------- MEJORAS ------------------------- */
+{c:"2.01", g:"pisos", t:"Piso de habitaciones",
+ base:"Madera laminada en las habitaciones, con zócalo en madera color Rovere.",
+ up:"Porcelanato Atlanta Blanco formato 56×56 (o similar). El zócalo <b>se conserva en madera Rovere</b>. Incluye cambio de mortero con malla.",
+ chips:["Porcelanato Atlanta Blanco","56×56"],
+ flags:[["OJO","Deja porcelanato blanco contra zócalo de madera. Si esa mezcla no te convence en el render, mira también el 2.02."]]},
+
+{c:"2.02", g:"pisos", t:"Zócalo a porcelanato", needs:["2.01"],
+ base:"Zócalo en madera color Rovere en habitaciones y zona social.",
+ up:"Zócalo en Porcelanato Atlanta Blanco (o similar) en habitaciones <b>y zona social</b>. El precio ya descuenta el zócalo en madera.",
+ chips:["Porcelanato Atlanta Blanco"],
+ flags:[["DEP","Solo se puede pedir junto con el 2.01."],
+        ["NO","No aplica a cocina ni zona de ropas — ahí el zócalo ya viene en porcelanato."]]},
+
+{c:"3.01", g:"cocina", t:"Mueble superior de cocina y lavaplatos",
+ base:null,
+ up:"Mueble <b>superior</b> en pintura poliuretano blanco brillante, y locero (lavaplatos) en acero inoxidable.",
+ chips:["Poliuretano blanco brillante","Acero inoxidable"],
+ flags:[["OJO","Cubre únicamente el mueble superior. El mueble inferior no cambia."]]},
+
+{c:"3.02", g:"cocina", t:"Mesones, salpicadero y grifería de cocina",
+ base:"Salpicadero en enchape de cerámica básica, maneral de gas básico, mesón sin reengruese y frente de barra sin enchape especial.",
+ up:"Grifería Liquid LVP monocontrol negro mate · salpicadero completo en quarztone Blanco Extremo · maneral de gas de lujo · lateral de barra en quarztone · <b>reengruese</b> del mesón de cocina, barra y lateral · frente de la barra en mosaico Esagono Grigio mate.",
+ chips:["Liquid LVP negro mate","Quarztone Blanco Extremo","Esagono Grigio mate","Reengruese"],
+ flags:[["NETO","El precio ya incluye el descuento de la cerámica básica y del maneral de gas básico."]]},
+
+{c:"3.03", g:"cocina", t:"Mueble de alacena en la sala",
+ base:"No hay alacena; la sala se entrega sin ese mueble.",
+ up:"Mueble de alacena en la sala, en madera color Rovere, ubicado según diseño.",
+ chips:["Madera Rovere"],
+ flags:[["SOLO","Exclusivo de los apartamentos 19, 21, 22 y 24."]]},
+
+{c:"7.01", g:"banos", t:"Baño social (de alcobas) completo",
+ base:"Enchapes básicos, mesón sin reengruese, lavamanos de empotrar, grifería monocontrol media, ducha monocontrol e incrustaciones básicas.",
+ up:"Pared frontal a la cabina en porcelanato Mos Hexa District Blanco 28.5×32.1 · piso en cerámica Home Gris 31×60 · reengruese del mesón · lavamanos Varese Blanco tipo <b>Vessel de sobreponer</b> · grifería de lavamanos Liquid alta monocontrol negro mate · grifería de ducha Liquid monocontrol + regadera negro mate · kit de incrustaciones Liquid negro mate (percha, portarrollos, toallero, jabonera).",
+ chips:["Mos Hexa District Blanco","Home Gris 31×60","Lavamanos Vessel","Liquid negro mate"],
+ flags:[["NETO","El precio ya descuenta enchapes, aparatos, griferías e incrustaciones básicos."]]},
+
+{c:"7.02", g:"banos", t:"Baño principal completo",
+ base:"Enchapes básicos, mesón sin reengruese, lavamanos de empotrar, grifería monocontrol media, ducha monocontrol e incrustaciones básicas.",
+ up:"El mismo paquete del 7.01 aplicado al baño principal: Mos Hexa District Blanco en la pared frontal, piso Home Gris 31×60, reengruese de mesón, lavamanos Vessel, y toda la grifería e incrustaciones Liquid en negro mate.",
+ chips:["Mos Hexa District Blanco","Home Gris 31×60","Lavamanos Vessel","Liquid negro mate"],
+ flags:[["OK","Se pide por separado del 7.01 — puedes mejorar un solo baño."]]},
+
+{c:"5.01", g:"inst", t:"Conmutables en alcobas y toma en balcón",
+ base:null,
+ up:"Interruptor conmutable en las alcobas (prender y apagar desde dos puntos) y una toma de intemperie en el balcón.",
+ chips:["Balcón"],
+ flags:[["SOLO","Versión para pisos 4 en adelante."]]},
+
+{c:"5.02", g:"inst", t:"Conmutables en alcobas y dos tomas en terraza",
+ base:null,
+ up:"Interruptor conmutable en las alcobas y <b>dos</b> tomas de intemperie en la terraza.",
+ chips:["Terraza"],
+ flags:[["SOLO","Exclusivo del piso 3, que es el que tiene terraza."]]},
+
+{c:"5.03", g:"inst", t:"Preinstalación de extractor — baño social",
+ base:null,
+ up:"Salida eléctrica e hidrosanitaria en el baño social para instalar a futuro un extractor de olores. Se cambia el interruptor sencillo por doble.",
+ chips:["Preinstalación"],
+ flags:[["OJO","<b>No incluye el extractor.</b> Solo deja las salidas listas."]]},
+
+{c:"5.04", g:"inst", t:"Preinstalación de extractor — baño principal",
+ base:null,
+ up:"Salida eléctrica e hidrosanitaria en el baño principal para instalar a futuro un extractor de olores. Se cambia el interruptor sencillo por doble.",
+ chips:["Preinstalación"],
+ flags:[["OJO","<b>No incluye el extractor.</b> Solo deja las salidas listas."]]},
+
+{c:"6.01", g:"inst", t:"Agua caliente para la lavadora",
+ base:null, up:"Salida de agua caliente en la zona de ropas para la lavadora.", chips:[], flags:[]},
+
+{c:"6.02", g:"inst", t:"Salida de gas en el balcón",
+ base:null, up:"Salida adicional de gas en el balcón para instalar un asador.", chips:["Asador"], flags:[]},
+
+/* ------------------------ RENUNCIAS ------------------------ */
+{c:"8.01", g:"carp", t:"Puerta de la habitación principal", neg:true,
+ base:"Puerta arquitectónica instalada.", up:"No te la instalan y te reconocen su valor.", chips:[], flags:[]},
+{c:"8.02", g:"carp", t:"Puerta de la habitación 2", neg:true,
+ base:"Puerta arquitectónica instalada.", up:"No te la instalan y te reconocen su valor.", chips:[], flags:[]},
+{c:"8.03", g:"carp", t:"Puerta de la habitación 3", neg:true,
+ base:"Puerta arquitectónica instalada.", up:"No te la instalan y te reconocen su valor.", chips:[], flags:[]},
+{c:"8.04", g:"carp", t:"Puerta del baño principal", neg:true,
+ base:"Puerta arquitectónica instalada.", up:"No te la instalan y te reconocen su valor.", chips:[], flags:[]},
+{c:"8.05", g:"carp", t:"Puerta del baño social", neg:true,
+ base:"Puerta arquitectónica instalada.", up:"No te la instalan y te reconocen su valor.", chips:[], flags:[]},
+{c:"8.06", g:"carp", t:"Puerta del vestier", neg:true,
+ base:"Puerta arquitectónica del vestier instalada.", up:"No te la instalan y te reconocen su valor.",
+ chips:[], flags:[["SOLO","Solo en las tipologías que traen vestier (19, 21, 22 y 24)."]]},
+{c:"8.07", g:"carp", t:"Puerta de la zona de ropas", neg:true,
+ base:"Puerta en vidrio templado.", up:"No te la instalan y te reconocen su valor.", chips:["Vidrio templado"], flags:[]},
+{c:"8.08", g:"carp", t:"Clóset de la habitación principal", neg:true,
+ base:"Clóset instalado en la habitación principal.", up:"No te lo instalan y te reconocen su valor.",
+ chips:[], flags:[["SOLO","Solo en las tipologías 20 y 23, que traen clóset en vez de vestier."]]},
+{c:"8.09", g:"carp", t:"Clóset de la habitación 2", neg:true,
+ base:"Clóset instalado.", up:"No te lo instalan y te reconocen su valor.", chips:[], flags:[]},
+{c:"8.10", g:"carp", t:"Clóset de la habitación 3", neg:true,
+ base:"Clóset instalado.", up:"No te lo instalan y te reconocen su valor.", chips:[], flags:[]},
+{c:"8.11", g:"carp", t:"Vestier de la habitación principal", neg:true,
+ base:"Vestier instalado en la habitación principal.", up:"No te lo instalan y te reconocen su valor.",
+ chips:[], flags:[["SOLO","Solo en las tipologías que traen vestier (19, 21, 22 y 24)."]]},
+
+{c:"8.12", g:"combo", t:"Piso de zona social + cocina completa", neg:true,
+ needs:["8.01","8.02","8.03","8.05","8.07"], excl:["8.13","8.17","8.21"],
+ base:"Piso en porcelanato en zona social, zócalo en madera, cocina completa con muebles, mesón en quarztone, lavaplatos, grifería, enchape, horno, cubierta y campana.",
+ up:"Te descuentan el piso de la zona social, el zócalo en madera y el zócalo en porcelanato de cocina y ropas, más la cocina completa (muebles superior e inferior, barra auxiliar, mesón, lavaplatos, grifería, enchape entre muebles, horno, cubierta, campana y rebanco).<br><br>Quedan las salidas eléctricas de horno, campana, microondas y barra, y las hidrosanitarias del lavaplatos, con tapón. El balcón se entrega enchapado para conservar el acabado de fachada.",
+ chips:["Excluyente"], flags:[]},
+
+{c:"8.13", g:"combo", t:"Piso de zona social + barra auxiliar", neg:true,
+ needs:["8.01","8.02","8.03","8.05","8.07"], excl:["8.12","8.21"],
+ base:"Piso en porcelanato en zona social con su zócalo, y barra auxiliar con su mesón.",
+ up:"Te descuentan el piso de la zona social, el zócalo en madera, el zócalo en porcelanato de cocina y ropas, y la barra auxiliar con su mesón. La cocina sí te la instalan. El balcón se entrega enchapado.",
+ chips:["Excluyente"], flags:[]},
+
+{c:"8.14", g:"combo", t:"Piso de todas las habitaciones", neg:true,
+ needs:["8.01","8.02","8.03","8.04","8.06","8.08","8.09","8.10","8.11"],
+ base:"Piso en madera laminada y zócalo en madera en todas las habitaciones.",
+ up:"Te descuentan el piso en madera laminada y el zócalo de todas las habitaciones. Se entrega en mortero reforzado, sin rebanco.",
+ chips:[], flags:[]},
+
+{c:"8.15", g:"combo", t:"Acabados del baño social", neg:true, needs:["8.05"],
+ base:"Baño social terminado: pintura, enchapes, cielo en drywall, sanitario, mueble, mesón, lavamanos, grifería, cabina y espejo.",
+ up:"Te descuentan pintura y estuco, piso y zócalo, enchapes, cielo en drywall con su ojo de buey (queda plafón), sanitario, mueble de baño, mesón en quarztone, lavamanos, grifería, incrustaciones, ducha, cabina en vidrio templado y espejo.<br><br>Se entrega en revoque y mortero, con los desagües tapados y las salidas de agua a la altura del abasto.",
+ chips:[], flags:[]},
+
+{c:"8.16", g:"combo", t:"Acabados del baño principal", neg:true, needs:["8.04"],
+ base:"Baño principal terminado: pintura, enchapes, cielo en drywall, sanitario, mueble, mesón, lavamanos, grifería, cabina y espejo.",
+ up:"El mismo descuento del 8.15 aplicado al baño principal. Se entrega en revoque y mortero, con los desagües tapados y las salidas de agua a la altura del abasto.",
+ chips:[], flags:[]},
+
+{c:"8.17", g:"combo", t:"Cocina completa", neg:true, excl:["8.12","8.21"],
+ base:"Cocina completa instalada con muebles, barra, mesón, lavaplatos, grifería, enchape, horno, cubierta y campana.",
+ up:"Te descuentan muebles superior e inferior, barra auxiliar, mesón en quarztone, lavaplatos, grifería, enchape entre muebles, horno, cubierta, campana y rebanco. El piso de la zona social sí te lo instalan.<br><br>Quedan las salidas eléctricas e hidrosanitarias con tapón.",
+ chips:["Excluyente"], flags:[]},
+
+{c:"8.18", g:"combo", t:"Zona de ropas", neg:true,
+ base:"Lavadero básico con su puerta, soportes, canilla y enchape en cerámica.",
+ up:"Te descuentan el lavadero básico completo. Las salidas de agua fría y desagüe se entregan con tapón.",
+ chips:[], flags:[]},
+
+{c:"8.19", g:"combo", t:"Calentador de paso 5.5 lt", neg:true,
+ base:"Calentador de paso de 5.5 litros instalado.", up:"No te lo instalan y te reconocen su valor.", chips:[], flags:[]},
+
+{c:"8.21", g:"combo", t:"Barra auxiliar", neg:true, excl:["8.12","8.13","8.17"],
+ base:"Barra auxiliar con mesón de cocina en quarztone.",
+ up:"Te descuentan la barra auxiliar con su mesón en quarztone. Todo lo demás de la cocina sí te lo instalan.",
+ chips:["Excluyente"], flags:[]},
+
+{c:"8.20", g:"todo", t:"Apartamento completo en obra gris", neg:true,
+ base:"Apartamento entregado con todos sus acabados.",
+ up:"Te descuentan <b>todo</b>: piso de zona social y de habitaciones con sus zócalos, cocina completa, zona de ropas, los dos baños, toda la carpintería en madera (puertas y clósets) y el calentador de paso.<br><br>Recibes el apartamento en obra gris, con los desagües tapados y las salidas eléctricas e hidrosanitarias dejadas.",
+ chips:["Anula todo el grupo 8"],
+ flags:[["STOP","Esta opción ya incluye todas las demás renuncias, así que al marcarla se desmarcan las otras. No es plata gratis: recibes un apartamento sin acabados y tendrás que hacerlos por tu cuenta."]]}
+];
+
+var GROUPS = [
+ {k:"pisos", n:"Grupo 2", t:"Pisos", kind:"up",
+  s:"Lo primero que se nota en cualquier render. El 2.02 depende del 2.01."},
+ {k:"cocina", n:"Grupo 3", t:"Cocina", kind:"up",
+  s:"Tres decisiones independientes: el mueble superior, el paquete de mesones y grifería, y la alacena."},
+ {k:"banos", n:"Grupo 7", t:"Baños", kind:"up",
+  s:"Dos paquetes de contenido idéntico. Puedes mejorar uno, los dos, o ninguno."},
+ {k:"inst", n:"Grupos 5 y 6", t:"Instalaciones", kind:"up",
+  s:"No cambian nada estético — no las busques en los renders. Se deciden por uso, no por foto."},
+ {k:"carp", n:"Grupo 8 · piezas sueltas", t:"Puertas, clósets y vestier", kind:"neg",
+  s:"Renuncias pequeñas e independientes entre sí. Varias son obligatorias si tomas alguna de las renuncias grandes de abajo."},
+ {k:"combo", n:"Grupo 8 · paquetes", t:"Paquetes de renuncia", kind:"neg",
+  s:"Renuncias grandes. Ojo con las excluyentes: varias se pisan entre sí porque cubren lo mismo."},
+ {k:"todo", n:"Grupo 8 · total", t:"Renuncia total", kind:"neg",
+  s:"La opción de recibir el apartamento en obra gris."}
+];
+
+var NO_UPGRADE = [
+ ["Piso de la zona social","El porcelanato de sala y comedor viene fijo. Solo se puede eliminar, no cambiar por otro."],
+ ["Mueble inferior de cocina","El 3.01 cubre solo el superior."],
+ ["Acabado de puertas y clósets","Solo se pueden eliminar; no hay opción de otro acabado o color."],
+ ["Pintura, cielo raso, sanitarios, cabina de ducha y espejo","Sin alternativa en la lista de precios."],
+ ["Calentador, zona de ropas y vestier","Solo se pueden quitar."],
+ ["Ventanería y fachada","El balcón se entrega siempre enchapado para conservar el acabado de fachada."]
+];
+
+var LS = "nature-bio-reformas-v1";
+var DISCLAIM = "AVISO: precios de la lista 2023, herramienta NO OFICIAL, solo un estimado aproximado. El valor final lo define la constructora. Verifica todo con tu asesor comercial.";
+
+var state = {tipo:22, piso:21, d:{}, n:{}};
+
+/* ---------------------- persistencia ---------------------- */
+function readHash(){
+  var h = location.hash.replace(/^#/,"");
+  if(!h) return false;
+  var got = false, parts = h.split("&");
+  for(var i=0;i<parts.length;i++){
+    var kv = parts[i].split("="), k = kv[0], v = decodeURIComponent(kv[1]||"");
+    if(k==="t"){ var t=parseInt(v,10); if(t>=19&&t<=24){ state.tipo=t; got=true; } }
+    else if(k==="p"){ var p=parseInt(v,10); if(p>=3&&p<=28){ state.piso=p; got=true; } }
+    else if(k==="s" && v){
+      var d={}, pairs=v.split(",");
+      for(var j=0;j<pairs.length;j++){
+        var pc=pairs[j].split(":");
+        if(pc.length===2 && P[pc[0]] && /^(si|quiza|no)$/.test(pc[1])) d[pc[0]]=pc[1];
+      }
+      state.d = d; got = true;
+    }
+  }
+  return got;
+}
+function writeHash(){
+  var sel = [];
+  for(var c in state.d){ if(state.d[c]) sel.push(c+":"+state.d[c]); }
+  var h = "t="+state.tipo+"&p="+state.piso+(sel.length?"&s="+sel.join(","):"");
+  history.replaceState(null,"","#"+h);
+}
+function save(){
+  try{ localStorage.setItem(LS, JSON.stringify(state)); }catch(e){}
+  writeHash();
+}
+function load(){
+  try{
+    var raw = localStorage.getItem(LS);
+    if(raw){
+      var l = JSON.parse(raw);
+      if(l && typeof l==="object"){
+        if(l.tipo>=19&&l.tipo<=24) state.tipo=l.tipo;
+        if(l.piso>=3&&l.piso<=28) state.piso=l.piso;
+        state.d = l.d||{}; state.n = l.n||{};
+      }
+    }
+  }catch(e){}
+  readHash(); /* el link compartido gana sobre lo guardado */
+}
+
+/* ------------------------ helpers ------------------------- */
+function col(){ return sheetFor(state.tipo, state.piso); }
+function priceOf(c){ var r=P[c]; return r ? r[col()] : null; }
+function applies(c){ return priceOf(c) !== null && priceOf(c) !== undefined; }
+function dec(c){ return state.d[c] || ""; }
+function cop(v){
+  var s = Math.abs(Math.round(v)).toString().replace(/\B(?=(\d{3})+(?!\d))/g,".");
+  return (v<0 ? "− $ " : "$ ") + s;
+}
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function itemBy(c){
+  for(var i=0;i<ITEMS.length;i++) if(ITEMS[i].c===c) return ITEMS[i];
+  return null;
+}
+/* dependencias de un item, filtradas a las que aplican a esta tipologia */
+function needsOf(it){
+  if(!it.needs) return [];
+  return it.needs.filter(applies);
+}
+/* items que chocan con este: los declarados, mas 8.20 contra todo el grupo 8 */
+function conflictsOf(it){
+  var out = (it.excl||[]).slice();
+  if(it.c==="8.20"){
+    for(var i=0;i<ITEMS.length;i++){
+      if(ITEMS[i].neg && ITEMS[i].c!=="8.20" && applies(ITEMS[i].c)) out.push(ITEMS[i].c);
+    }
+  }else if(it.neg && applies("8.20")){
+    out.push("8.20");
+  }
+  return out.filter(applies);
+}
+function blockedBy(it){
+  var cf = conflictsOf(it), hit = [];
+  for(var i=0;i<cf.length;i++) if(dec(cf[i])==="si") hit.push(cf[i]);
+  return hit;
+}
+function missingNeeds(it){
+  if(dec(it.c)!=="si") return [];
+  return needsOf(it).filter(function(c){ return dec(c)!=="si"; });
+}
+
+function totals(){
+  var plus=0, minus=0, nPlus=0, nMinus=0, pend=0;
+  for(var i=0;i<ITEMS.length;i++){
+    var it = ITEMS[i];
+    if(!applies(it.c)) continue;
+    var v = dec(it.c), pr = priceOf(it.c);
+    if(v==="si"){
+      if(pr<0){ minus += pr; nMinus++; } else { plus += pr; nPlus++; }
+    }else if(v!=="no" && v!=="quiza"){ pend++; }
+  }
+  return {plus:plus, minus:minus, net:plus+minus, nPlus:nPlus, nMinus:nMinus, pend:pend};
+}
+
+/* ------------------------- render ------------------------- */
+function itemHTML(it){
+  var d = dec(it.c), blk = blockedBy(it), miss = missingNeeds(it);
+  var cls = "item" + (it.neg?" neg":"") + (blk.length?" blocked":"");
+  var h = '<article class="'+cls+'" data-d="'+d+'" id="it-'+it.c+'">';
+
+  h += '<div class="item-top"><div class="code">'+it.c+'</div>'
+    +  '<div class="name"><h3>'+esc(it.t)+'</h3></div>'
+    +  '<div class="price">'+cop(priceOf(it.c))+'</div></div>';
+
+  h += '<div class="vs"><div class="base"><p class="h">'+(it.neg?"Qué pierdes":"Por defecto")+'</p>';
+  h += it.base ? '<p>'+it.base+'</p>'
+               : '<p class="nd">La lista de precios no describe el acabado base de este ítem — pregúntaselo a tu asesor.</p>';
+  h += '</div><div class="up"><p class="h">'+(it.neg?"Qué te reconocen":"Con la mejora")+'</p><p>'+it.up+'</p>';
+  if(it.chips.length){
+    h += '<div class="chips">';
+    for(var i=0;i<it.chips.length;i++) h += '<span class="chip">'+esc(it.chips[i])+'</span>';
+    if(!it.neg) h += '<span class="chip mute">o similar</span>';
+    h += '</div>';
+  }
+  h += '</div></div>';
+
+  for(var j=0;j<it.flags.length;j++){
+    var k = it.flags[j][0];
+    h += '<div class="flag'+(k==="STOP"?" stop":"")+'"><span class="mk">'+k+'</span><span>'+it.flags[j][1]+'</span></div>';
+  }
+
+  if(blk.length){
+    h += '<div class="flag stop"><span class="mk">BLOQUEADO</span><span>Ya marcaste el <b>'
+      +  blk.join('</b> y el <b>')+'</b>, que cubre'+(blk.length>1?"n":"")+' lo mismo. Desmárcalo si prefieres esta opción.</span></div>';
+  }
+  if(miss.length){
+    h += '<div class="flag warn"><span class="mk">FALTA</span><span>Esta renuncia exige incluir también el <b>'
+      +  miss.join('</b>, el <b>')+'</b>.</span>'
+      +  '<button type="button" class="fix no-print" data-add="'+miss.join(",")+'">Añadir</button></div>';
+  }
+
+  h += '<div class="decide"><div class="seg" role="group" aria-label="Decisión ítem '+it.c+'">';
+  var opts = it.neg ? [["si","Renuncio"],["quiza","Quizá"],["no","La conservo"]]
+                    : [["si","Sí"],["quiza","Quizá"],["no","No"]];
+  for(var k2=0;k2<opts.length;k2++){
+    h += '<button type="button" data-c="'+it.c+'" data-v="'+opts[k2][0]+'" aria-pressed="'+(d===opts[k2][0])+'">'+opts[k2][1]+'</button>';
+  }
+  h += '</div><input class="note" type="text" data-c="'+it.c+'" placeholder="Nota…" value="'+esc(state.n[it.c]||"")+'"></div>';
+  return h + '</article>';
+}
+
+function render(){
+  var t = totals(), sheet = SHEETS[col()], h = "";
+
+  h += '<header class="masthead">'
+    +  '<p class="eyebrow">Proyecto Nature Bio · Torre 4 · Sabaneta</p>'
+    +  '<h1>Qué puedes cambiarle a tu apartamento</h1>'
+    +  '<p class="lede">Cada fila es una decisión independiente: a la izquierda lo que trae el apartamento, a la derecha lo que pasa si tomas la opción. Elige tu tipología y tu piso, marca lo que te interesa y llévale la lista a tu asesor.</p>'
+    +  '</header>';
+
+  /* selector */
+  var tOpts = "", pOpts = "";
+  [19,20,21,22,23,24].forEach(function(n){
+    tOpts += '<option value="'+n+'"'+(n===state.tipo?" selected":"")+'>Tipo '+n+'</option>';
+  });
+  for(var p=3;p<=28;p++){
+    pOpts += '<option value="'+p+'"'+(p===state.piso?" selected":"")+'>Piso '+p+'</option>';
+  }
+  h += '<div class="picker no-print">'
+    +  '<label><span class="lab">Tipología</span><select id="sel-tipo">'+tOpts+'</select></label>'
+    +  '<label><span class="lab">Piso</span><select id="sel-piso">'+pOpts+'</select></label>'
+    +  '<div class="hint">Estás viendo la lista <b>'+esc(sheet)+'</b>. Los precios y los ítems disponibles cambian según la tipología y el piso.</div>'
+    +  '</div>';
+
+  /* resumen */
+  h += '<div class="tally"><div class="tally-grid">'
+    +  '<div><span class="lab">Mejoras ('+t.nPlus+')</span><span class="fig plus" id="f-plus">'+cop(t.plus)+'</span></div>'
+    +  '<div><span class="lab">Renuncias ('+t.nMinus+')</span><span class="fig less" id="f-minus">'+cop(t.minus)+'</span></div>'
+    +  '<div><span class="lab">Estimado neto</span><span class="fig" id="f-net">'+cop(t.net)+'</span></div>'
+    +  '<div class="acts no-print">'
+    +    '<button class="btn" id="theme" type="button">Tema</button>'
+    +    '<button class="btn" id="reset" type="button">Limpiar</button>'
+    +    '<button class="btn" id="print" type="button">Imprimir</button>'
+    +    '<button class="btn primary" id="export" type="button">Descargar</button>'
+    +  '</div></div>'
+    +  '<div class="tally-note">Estimado sobre precios de 2023 · el valor real lo confirma tu asesor</div></div>';
+
+  /* como leer */
+  h += '<div class="explain"><h2>Antes de empezar: hay dos cosas distintas aquí</h2>'
+    +  '<p><b>Las mejoras</b> (grupos 2, 3, 5, 6 y 7) cambian un acabado por uno mejor. <b>Suman</b> al precio del apartamento.</p>'
+    +  '<p><b>Las renuncias</b> (grupo 8) no son mejoras: es pedir que <em>no</em> te instalen algo que ya venía incluido, a cambio de que te reconozcan su valor. <b>Restan</b>, pero recibes menos apartamento.</p>'
+    +  '<p>La lista de precios original mezcla las dos bajo la misma palabra y trae todo marcado en 1, lo que da un total negativo que no significa nada. Por eso aquí van separadas.</p>'
+    +  '</div>';
+
+  /* secciones */
+  for(var s=0;s<GROUPS.length;s++){
+    var G = GROUPS[s];
+    var rows = ITEMS.filter(function(it){ return it.g===G.k && applies(it.c); });
+    if(!rows.length) continue;
+    h += '<section class="sec"><div class="sec-head"><span class="n">'+G.n+'</span><h2>'+G.t+'</h2></div>'
+      +  '<p class="sec-sub">'+G.s+'</p>';
+    for(var i=0;i<rows.length;i++) h += itemHTML(rows[i]);
+    h += '</section>';
+  }
+
+  /* cierre */
+  h += '<section class="sec"><div class="sec-head"><span class="n">Fuera de lista</span><h2>Lo que no se puede cambiar</h2></div>'
+    +  '<div class="block"><p>Si en los renders ves alternativas para algo de esta lista, no vienen de la lista de precios de reformas. Pregúntale a tu asesor de dónde salen.</p><ul>';
+  for(var q=0;q<NO_UPGRADE.length;q++){
+    h += '<li><b>'+esc(NO_UPGRADE[q][0])+'</b><span>'+esc(NO_UPGRADE[q][1])+'</span></li>';
+  }
+  h += '</ul></div>'
+    +  '<div class="block"><h3>Tres cosas que conviene saber</h3>'
+    +  '<p>Todas las referencias de la lista dicen <b>«o similar»</b>. La constructora puede entregar referencias equivalentes en aparatos, electrodomésticos, colores de enchapes, mesones y carpintería según la disponibilidad del proveedor a la fecha de entrega. <b>Los renders son referenciales, no contractuales.</b></p>'
+    +  '<p>En seis ítems la lista de precios <b>no dice cuál es el acabado que estás reemplazando</b>, solo a qué cambias. Esas filas lo advierten en vez de suponerlo.</p>'
+    +  '<p>La lista tampoco aclara si el saldo se descuenta del precio de venta o se paga aparte; solo advierte que si te retiras del negocio o no te aprueban el crédito hipotecario, no devuelven dineros de reformas.</p>'
+    +  '</div></section>';
+
+  h += '<p class="foot">Herramienta no oficial, sin relación con la constructora. Construida sobre la lista de precios de reformas de 2023, Torre 4.<br>'
+    +  'Vista actual: '+esc(sheet)+' · '+t.pend+' ítems sin decidir.<br>'
+    +  '<a href="/">57apps</a></p>';
+
+  document.getElementById("app").innerHTML = h;
+}
+
+/* --------------------- interacciones ---------------------- */
+function setDecision(c, v){
+  var it = itemBy(c);
+  if(!it) return;
+  if(state.d[c] === v){ state.d[c] = ""; save(); render(); return; }
+  if(v === "si"){
+    /* al marcar, limpiar lo que choca con este item */
+    var cf = conflictsOf(it);
+    for(var i=0;i<cf.length;i++) if(state.d[cf[i]]==="si") state.d[cf[i]] = "";
+  }
+  state.d[c] = v;
+  save();
+  render();
+}
+
+function exportTxt(){
+  var t = totals(), sheet = SHEETS[col()];
+  var L = [DISCLAIM, "",
+           "SELECCION DE REFORMAS - PROYECTO NATURE BIO, TORRE 4",
+           "Apartamento tipo " + state.tipo + ", piso " + state.piso,
+           "Lista aplicada: " + sheet, ""];
+  var buckets = [
+    ["si",    false, "MEJORAS QUE QUIERO"],
+    ["quiza", false, "MEJORAS EN DUDA"],
+    ["si",    true,  "RENUNCIAS QUE QUIERO"],
+    ["quiza", true,  "RENUNCIAS EN DUDA"]
+  ];
+  for(var b=0;b<buckets.length;b++){
+    var rows = ITEMS.filter(function(it){
+      return applies(it.c) && dec(it.c)===buckets[b][0] && !!it.neg===buckets[b][1];
+    });
+    if(!rows.length) continue;
+    L.push(buckets[b][2]);
+    for(var i=0;i<rows.length;i++){
+      var nt = state.n[rows[i].c] ? "   // " + state.n[rows[i].c] : "";
+      L.push("  " + rows[i].c + "  " + rows[i].t + "  " + cop(priceOf(rows[i].c)) + nt);
+    }
+    L.push("");
+  }
+  L.push("Mejoras:       " + cop(t.plus));
+  L.push("Renuncias:     " + cop(t.minus));
+  L.push("ESTIMADO NETO: " + cop(t.net));
+  L.push("", DISCLAIM);
+
+  var blob = new Blob([L.join("\n")], {type:"text/plain;charset=utf-8"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = "reformas-nature-bio-tipo" + state.tipo + "-piso" + state.piso + ".txt";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+}
+
+/* Delegado UNA sola vez sobre #app, que es estable entre renders.
+   render() solo reemplaza innerHTML: volver a registrar aqui apilaria
+   listeners y cada click alternaria el mismo item dos veces. */
+function wire(){
+  var app = document.getElementById("app");
+
+  app.addEventListener("click", function(ev){
+    var b = ev.target.closest(".seg button");
+    if(b){
+      var c = b.getAttribute("data-c");
+      setDecision(c, b.getAttribute("data-v"));
+      var el = document.getElementById("it-"+c);
+      if(el){
+        var f = el.querySelector('.seg button[aria-pressed="true"]') || el.querySelector(".seg button");
+        if(f) f.focus({preventScroll:true});
+      }
+      return;
+    }
+    var fix = ev.target.closest("[data-add]");
+    if(fix){
+      fix.getAttribute("data-add").split(",").forEach(function(c){
+        if(applies(c)) state.d[c] = "si";
+      });
+      save(); render(); return;
+    }
+    if(ev.target.closest("#reset")){
+      state.d = {}; state.n = {}; save(); render(); return;
+    }
+    if(ev.target.closest("#print")){ window.print(); return; }
+    if(ev.target.closest("#export")){ exportTxt(); return; }
+    if(ev.target.closest("#theme")){
+      var cur = document.documentElement.getAttribute("data-theme");
+      var next = cur==="dark" ? "light" : cur==="light" ? "dark"
+        : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "light" : "dark");
+      document.documentElement.setAttribute("data-theme", next);
+      try{ localStorage.setItem(LS+"-theme", next); }catch(e){}
+    }
+  });
+
+  app.addEventListener("input", function(ev){
+    var n = ev.target.closest(".note");
+    if(n){ state.n[n.getAttribute("data-c")] = n.value; save(); }
+  });
+
+  app.addEventListener("change", function(ev){
+    if(ev.target.id==="sel-tipo"){ state.tipo = parseInt(ev.target.value,10); save(); render(); }
+    else if(ev.target.id==="sel-piso"){ state.piso = parseInt(ev.target.value,10); save(); render(); }
+  });
+
+  window.addEventListener("hashchange", function(){
+    if(readHash()) render();
+  });
+}
+
+try{
+  var th = localStorage.getItem(LS+"-theme");
+  if(th) document.documentElement.setAttribute("data-theme", th);
+}catch(e){}
+
+load();
+render();
+wire();
+})();
+</script>
+</body>
+</html>
