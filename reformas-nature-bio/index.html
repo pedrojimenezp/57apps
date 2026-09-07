@@ -139,6 +139,74 @@ h1{
   letter-spacing:-.02em; display:block;
 }
 .fig.plus{color:var(--si)} .fig.less{color:var(--minus)}
+.tally .fig-sub,.pctline{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px;
+  color:var(--ink-3); font-variant-numeric:tabular-nums; display:block; margin-top:2px;
+}
+.price .pctline{text-align:right; font-weight:400}
+
+/* precio del apartamento + filtros */
+.tools{
+  background:var(--surface); border:1px solid var(--line); border-top:none;
+  padding:13px 15px; display:flex; flex-wrap:wrap; gap:12px 26px; align-items:flex-start;
+}
+.tools .lab{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10px;
+  letter-spacing:.11em; text-transform:uppercase; color:var(--ink-3);
+  display:block; margin-bottom:5px;
+}
+.tools .lab em{font-style:normal; text-transform:none; letter-spacing:0}
+.tools .precio input{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:15px;
+  background:var(--surface-2); color:var(--ink); border:1px solid var(--line);
+  border-radius:2px; padding:6px 10px; width:170px;
+}
+.tools .privacy{
+  flex:1 1 240px; margin:0; font-size:11.5px; line-height:1.45; color:var(--ink-3); max-width:44ch;
+}
+.tools .privacy b{color:var(--ink-2); font-weight:600}
+.filtros .seg button{padding:5px 11px; font-size:12px}
+
+/* reversibilidad */
+.rev{
+  display:inline-block; margin-top:5px; padding:2px 8px; border-radius:2px;
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10.5px;
+  font-weight:600; letter-spacing:.03em; cursor:help;
+}
+.rev-ahora{background:var(--minus-soft); color:var(--minus)}
+.rev-caro{background:var(--quiza-soft); color:var(--quiza)}
+.rev-facil{background:var(--si-soft); color:var(--si)}
+.flag.opin{background:transparent; color:var(--ink-3)}
+.flag.opin .mk{color:var(--ink-3)}
+.flag.opin i{font-style:italic; opacity:.85}
+
+/* bloques de consecuencia y preguntas */
+.secnote{
+  background:var(--quiza-soft); color:var(--ink); border-left:3px solid var(--quiza);
+  padding:11px 14px; margin:0 0 14px; font-size:13px; line-height:1.5; max-width:70ch;
+}
+ul.entrega{margin:0; padding:0; list-style:none}
+ul.entrega li{
+  display:flex; gap:14px; padding:9px 0; border-top:1px solid var(--line-2);
+  font-size:13.5px; flex-wrap:wrap;
+}
+ul.entrega li:first-child{border-top:none}
+ul.entrega li b{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12px;
+  color:var(--minus); flex:0 0 auto; padding-top:2px;
+}
+ul.entrega li span{flex:1 1 260px; color:var(--ink)}
+ul.entrega.duda li b{color:var(--quiza)}
+ul.entrega.duda li span{color:var(--ink-2)}
+.dudastit{margin:16px 0 6px!important; font-size:13px!important; color:var(--quiza)!important; font-weight:600}
+.cierre{margin-top:14px!important; padding-top:12px; border-top:1px solid var(--line-2); font-size:13px!important}
+ol.preguntas{margin:0; padding-left:22px}
+/* display:list-item es obligatorio: la regla generica .block li pone
+   display:flex, y un flex item no pinta su marcador. */
+ol.preguntas li{
+  display:list-item; padding:7px 0; font-size:13.5px; line-height:1.5; color:var(--ink);
+}
+ol.preguntas li::marker{color:var(--brand); font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12px}
 .tally .acts{display:flex; align-items:center; gap:7px; flex-wrap:wrap}
 @media (max-width:700px){.tally .acts{grid-column:1/-1}}
 .tally-note{
@@ -540,6 +608,74 @@ var ITEMS = [
  flags:[["STOP","Esta opción ya incluye todas las demás renuncias, así que al marcarla se desmarcan las otras. No es plata gratis: recibes un apartamento sin acabados y tendrás que hacerlos por tu cuenta."]]}
 ];
 
+/* ---------------------------------------------------------------
+   REVERSIBILIDAD — que tan dificil es hacer esta obra DESPUES de
+   que te entreguen el apartamento.
+
+   ESTO NO SALE DE LA LISTA DE PRECIOS. El Excel no dice nada sobre
+   reversibilidad; es una apreciacion de quien hizo esta pagina, y
+   asi va marcada en pantalla, distinta de los avisos que si vienen
+   del documento (NETO, DEP, SOLO).
+
+   ahora = obra embebida (morteros, salidas de gas/agua/electricas,
+           preinstalaciones, reengrueses, enchapes de bano)
+   caro  = se puede, pero pagando dos veces o con demolicion
+   facil = mueble o pieza que se cambia sin romper nada
+----------------------------------------------------------------*/
+var REV = {
+ "2.01":"ahora", "2.02":"caro",  "3.01":"caro",  "3.02":"ahora", "3.03":"facil",
+ "5.01":"ahora", "5.02":"ahora", "5.03":"ahora", "5.04":"ahora",
+ "6.01":"ahora", "6.02":"ahora", "7.01":"ahora", "7.02":"ahora",
+ "8.01":"facil", "8.02":"facil", "8.03":"facil", "8.04":"facil", "8.05":"facil",
+ "8.06":"facil", "8.07":"facil", "8.08":"facil", "8.09":"facil", "8.10":"facil",
+ "8.11":"facil", "8.12":"caro",  "8.13":"caro",  "8.14":"caro",  "8.15":"caro",
+ "8.16":"caro",  "8.17":"caro",  "8.18":"facil", "8.19":"facil", "8.20":"caro",
+ "8.21":"facil"
+};
+var REV_LABEL = {
+  up:{  ahora:"Solo ahora", caro:"Caro después", facil:"Fácil después" },
+  neg:{ ahora:"Muy difícil después", caro:"Trabajo grande", facil:"Fácil de hacer tú" }
+};
+var REV_WHY = {
+  up:{
+    ahora:"Va embebido en la obra. Si no lo pides ahora, después implica romper.",
+    caro:"Se puede cambiar después, pero estarías pagando dos veces por lo mismo.",
+    facil:"Es una pieza que se cambia después sin romper nada."
+  },
+  neg:{
+    ahora:"Renunciar aquí te deja una obra que después es muy difícil de rehacer.",
+    caro:"Es un trabajo grande, pero normal de contratar por fuera y suele salir más barato.",
+    facil:"Lo puedes conseguir e instalar por tu cuenta sin complicaciones."
+  }
+};
+function revOf(c){ return REV[c] || null; }
+
+/* Como te entregan la zona si renuncias. Derivado de lo que la
+   propia hoja describe entre parentesis en cada item. */
+var ENTREGA = {
+ "8.01":"Habitación principal sin puerta.",
+ "8.02":"Habitación 2 sin puerta.",
+ "8.03":"Habitación 3 sin puerta.",
+ "8.04":"Baño principal sin puerta.",
+ "8.05":"Baño social sin puerta.",
+ "8.06":"Vestier sin puerta.",
+ "8.07":"Zona de ropas sin su puerta en vidrio templado.",
+ "8.08":"Habitación principal sin clóset.",
+ "8.09":"Habitación 2 sin clóset.",
+ "8.10":"Habitación 3 sin clóset.",
+ "8.11":"Habitación principal sin vestier.",
+ "8.12":"Zona social sin piso ni zócalo. Cocina sin muebles, mesón, lavaplatos, horno, cubierta ni campana, y sin rebanco. Las salidas eléctricas e hidrosanitarias quedan con tapón. El balcón sí se entrega enchapado.",
+ "8.13":"Zona social sin piso ni zócalo, y sin barra auxiliar ni su mesón. La cocina sí te la instalan. El balcón sí se entrega enchapado.",
+ "8.14":"Todas las habitaciones en mortero reforzado, sin piso, sin zócalo y sin rebanco.",
+ "8.15":"Baño social en revoque y mortero: sin pintura, sin enchapes, sin sanitario, mueble, mesón, lavamanos, grifería, cabina ni espejo. Desagües con tapón, salidas de agua a la altura del abasto y plafón en vez de ojo de buey.",
+ "8.16":"Baño principal en revoque y mortero, en las mismas condiciones que el social: desagües con tapón, salidas de agua a la altura del abasto y plafón en vez de ojo de buey.",
+ "8.17":"Cocina sin muebles, mesón, lavaplatos, grifería, enchape entre muebles, horno, cubierta ni campana, y sin rebanco. Las salidas quedan con tapón. El piso de la zona social sí te lo instalan.",
+ "8.18":"Zona de ropas sin lavadero, sin sus soportes, sin canilla y sin enchape. Salidas de agua fría y desagüe con tapón.",
+ "8.19":"Sin calentador de paso.",
+ "8.20":"Apartamento en obra gris: sin pisos en zona social ni habitaciones, sin cocina, sin zona de ropas, con los dos baños en revoque y mortero, sin puertas ni clósets y sin calentador. Quedan las salidas eléctricas e hidrosanitarias, con tapón.",
+ "8.21":"Sin barra auxiliar ni su mesón en quarztone. El resto de la cocina sí te lo instalan."
+};
+
 var GROUPS = [
  {k:"pisos", n:"Grupo 2", t:"Pisos", kind:"up",
   s:"Lo primero que se nota en cualquier render. El 2.02 depende del 2.01."},
@@ -550,7 +686,8 @@ var GROUPS = [
  {k:"inst", n:"Grupos 5 y 6", t:"Instalaciones", kind:"up",
   s:"No cambian nada estético — no las busques en los renders. Se deciden por uso, no por foto."},
  {k:"carp", n:"Grupo 8 · piezas sueltas", t:"Puertas, clósets y vestier", kind:"neg",
-  s:"Renuncias pequeñas e independientes entre sí. Varias son obligatorias si tomas alguna de las renuncias grandes de abajo."},
+  s:"Renuncias pequeñas e independientes entre sí. Varias son obligatorias si tomas alguna de las renuncias grandes de abajo.",
+  note:"Antes de renunciar a nada: lo que no te instalen lo tienes que hacer tú después de la entrega. Eso casi siempre significa <b>retrasar la mudanza o vivir un tiempo en obra</b>, y ese costo no aparece en ninguna de estas cifras."},
  {k:"combo", n:"Grupo 8 · paquetes", t:"Paquetes de renuncia", kind:"neg",
   s:"Renuncias grandes. Ojo con las excluyentes: varias se pisan entre sí porque cubren lo mismo."},
  {k:"todo", n:"Grupo 8 · total", t:"Renuncia total", kind:"neg",
@@ -569,7 +706,11 @@ var NO_UPGRADE = [
 var LS = "nature-bio-reformas-v1";
 var DISCLAIM = "AVISO: precios de la lista 2023, herramienta NO OFICIAL, solo un estimado aproximado. El valor final lo define la constructora. Verifica todo con tu asesor comercial.";
 
-var state = {tipo:22, piso:21, d:{}, n:{}};
+/* precio: valor del apartamento, solo para mostrar porcentajes.
+   NUNCA entra en el hash — es dato financiero personal y estos
+   enlaces estan hechos para compartirse. Vive solo en localStorage.
+   filtro: solo afecta que se pinta, nunca las decisiones ni los totales. */
+var state = {tipo:22, piso:21, d:{}, n:{}, precio:0, filtro:"todo"};
 
 /* ---------------------- persistencia ---------------------- */
 function readHash(){
@@ -601,6 +742,28 @@ function save(){
   try{ localStorage.setItem(LS, JSON.stringify(state)); }catch(e){}
   writeHash();
 }
+/* El hash y el localStorage pueden traer combinaciones imposibles: un
+   enlace editado a mano, o guardado antes de que existieran estas
+   reglas. Sin depurar, dos renuncias que se pisan se sumarian dos
+   veces. 8.20 gana sobre todo el grupo 8; entre las demas, gana la
+   primera en el orden de ITEMS, que es estable. */
+function sanitize(){
+  if(dec("8.20")==="si" && applies("8.20")){
+    for(var i=0;i<ITEMS.length;i++){
+      if(ITEMS[i].neg && ITEMS[i].c!=="8.20") state.d[ITEMS[i].c] = "";
+    }
+    return;
+  }
+  var kept = [];
+  for(var j=0;j<ITEMS.length;j++){
+    var it = ITEMS[j];
+    if(dec(it.c)!=="si" || !applies(it.c)) continue;
+    var cf = conflictsOf(it), clash = false;
+    for(var k=0;k<cf.length;k++) if(kept.indexOf(cf[k])>=0) clash = true;
+    if(clash) state.d[it.c] = ""; else kept.push(it.c);
+  }
+}
+
 function load(){
   try{
     var raw = localStorage.getItem(LS);
@@ -609,11 +772,13 @@ function load(){
       if(l && typeof l==="object"){
         if(l.tipo>=19&&l.tipo<=24) state.tipo=l.tipo;
         if(l.piso>=3&&l.piso<=28) state.piso=l.piso;
+        if(typeof l.precio==="number" && l.precio>0) state.precio=l.precio;
         state.d = l.d||{}; state.n = l.n||{};
       }
     }
   }catch(e){}
   readHash(); /* el link compartido gana sobre lo guardado */
+  sanitize();
 }
 
 /* ------------------------ helpers ------------------------- */
@@ -659,28 +824,118 @@ function missingNeeds(it){
   return needsOf(it).filter(function(c){ return dec(c)!=="si"; });
 }
 
+/* Los campos plus/minus/net/pend son SOLO los confirmados; exportTxt()
+   y el pie ya dependen de eso. Los quiza van aparte en qPlus/qMinus.
+   Un quiza es una decision tomada, asi que no cuenta como pendiente. */
 function totals(){
   var plus=0, minus=0, nPlus=0, nMinus=0, pend=0;
+  var qPlus=0, qMinus=0, nQPlus=0, nQMinus=0;
   for(var i=0;i<ITEMS.length;i++){
     var it = ITEMS[i];
     if(!applies(it.c)) continue;
     var v = dec(it.c), pr = priceOf(it.c);
     if(v==="si"){
       if(pr<0){ minus += pr; nMinus++; } else { plus += pr; nPlus++; }
-    }else if(v!=="no" && v!=="quiza"){ pend++; }
+    }else if(v==="quiza"){
+      if(pr<0){ qMinus += pr; nQMinus++; } else { qPlus += pr; nQPlus++; }
+    }else if(v!=="no"){ pend++; }
   }
-  return {plus:plus, minus:minus, net:plus+minus, nPlus:nPlus, nMinus:nMinus, pend:pend};
+  return {plus:plus, minus:minus, net:plus+minus,
+          nPlus:nPlus, nMinus:nMinus, pend:pend,
+          qPlus:qPlus, qMinus:qMinus, nQPlus:nQPlus, nQMinus:nQMinus,
+          nQ:nQPlus+nQMinus};
+}
+
+/* porcentaje sobre el precio del apartamento, si lo escribio */
+function pct(v){
+  if(!state.precio) return "";
+  var p = Math.abs(v) / state.precio * 100;
+  if(p < 0.005) return "";
+  return (p<1 ? p.toFixed(2) : p.toFixed(1)).replace(".", ",") + "%";
+}
+function pctLine(v){
+  var s = pct(v);
+  return s ? '<span class="pctline">'+s+' del apartamento</span>' : "";
+}
+function parsePrecio(s){
+  var n = parseInt(String(s).replace(/[^\d]/g,""), 10);
+  return isNaN(n) || n<=0 ? 0 : n;
+}
+
+/* items marcados en si o quiza: los dos casos hay que preguntarlos */
+function marcados(){
+  return ITEMS.filter(function(it){
+    return applies(it.c) && (dec(it.c)==="si" || dec(it.c)==="quiza");
+  });
+}
+
+/* Lista de preguntas para llevarle al asesor, derivada de la seleccion. */
+function preguntas(){
+  var sel = marcados(), q = [];
+
+  q.push("¿Estos precios siguen vigentes? Los que estoy usando son de la lista de 2023.");
+  q.push("¿El saldo se descuenta del precio de venta o se paga aparte, y en qué momento?");
+  q.push("¿Hasta qué fecha puedo cambiar de opinión sobre las reformas?");
+
+  var sinBase = sel.filter(function(it){ return !it.base; });
+  if(sinBase.length){
+    q.push("La lista no dice qué acabado traen por defecto estos ítems: "
+      + sinBase.map(function(it){ return it.c+" ("+it.t+")"; }).join(", ")
+      + ". ¿Cuál es exactamente lo que estoy reemplazando?");
+  }
+
+  var conRef = sel.filter(function(it){ return !it.neg && it.chips.length; });
+  if(conRef.length){
+    q.push("Las referencias de la lista dicen «o similar». ¿Me pueden confirmar por escrito cuáles van a entregar en "
+      + conRef.map(function(it){ return it.c; }).join(", ") + "?");
+  }
+
+  var negs = sel.filter(function(it){ return it.neg; });
+  if(negs.length){
+    q.push("Si renuncio a "
+      + negs.map(function(it){ return it.c; }).join(", ")
+      + ", ¿en qué estado exacto me entregan esas zonas y qué queda instalado?");
+    q.push("¿Renunciar a esos ítems cambia la fecha de entrega del apartamento?");
+  }
+
+  sel.forEach(function(it){
+    var miss = missingNeeds(it);
+    if(miss.length){
+      q.push("¿Es obligatorio incluir " + miss.join(", ") + " si tomo el " + it.c + "?");
+    }
+  });
+
+  if(dec("8.20")==="si"){
+    q.push("Si recibo el apartamento en obra gris, ¿qué pasa con la garantía y con los permisos para hacer la obra por dentro?");
+  }
+
+  var pre = sel.filter(function(it){ return it.c==="5.03" || it.c==="5.04"; });
+  if(pre.length){
+    q.push("Las preinstalaciones de extractor no incluyen el aparato. ¿Qué extractor sirve para esa salida y quién lo instala?");
+  }
+
+  return q;
 }
 
 /* ------------------------- render ------------------------- */
+/* El filtro solo decide que se pinta. Nunca toca state.d ni totals(). */
+function visible(it){
+  if(state.filtro==="ahora") return revOf(it.c)==="ahora";
+  if(state.filtro==="pend")  return dec(it.c)==="";
+  return true;
+}
+
 function itemHTML(it){
   var d = dec(it.c), blk = blockedBy(it), miss = missingNeeds(it);
   var cls = "item" + (it.neg?" neg":"") + (blk.length?" blocked":"");
   var h = '<article class="'+cls+'" data-d="'+d+'" id="it-'+it.c+'">';
 
+  var rv = revOf(it.c), kind = it.neg ? "neg" : "up";
   h += '<div class="item-top"><div class="code">'+it.c+'</div>'
-    +  '<div class="name"><h3>'+esc(it.t)+'</h3></div>'
-    +  '<div class="price">'+cop(priceOf(it.c))+'</div></div>';
+    +  '<div class="name"><h3>'+esc(it.t)+'</h3>'
+    +    (rv ? '<span class="rev rev-'+rv+'" title="'+esc(REV_WHY[kind][rv])+'">'+REV_LABEL[kind][rv]+'</span>' : '')
+    +  '</div>'
+    +  '<div class="price">'+cop(priceOf(it.c))+pctLine(priceOf(it.c))+'</div></div>';
 
   h += '<div class="vs"><div class="base"><p class="h">'+(it.neg?"Qué pierdes":"Por defecto")+'</p>';
   h += it.base ? '<p>'+it.base+'</p>'
@@ -697,6 +952,10 @@ function itemHTML(it){
   for(var j=0;j<it.flags.length;j++){
     var k = it.flags[j][0];
     h += '<div class="flag'+(k==="STOP"?" stop":"")+'"><span class="mk">'+k+'</span><span>'+it.flags[j][1]+'</span></div>';
+  }
+  if(rv){
+    h += '<div class="flag opin"><span class="mk">CRITERIO</span><span>'+REV_WHY[kind][rv]
+      +  ' <i>Esto lo estima esta página; la lista de precios no dice nada sobre reversibilidad.</i></span></div>';
   }
 
   if(blk.length){
@@ -743,10 +1002,16 @@ function render(){
     +  '</div>';
 
   /* resumen */
+  function sub(n, val){
+    return n ? '<span class="fig-sub">con '+n+' quizá: '+cop(val)+'</span>' : '';
+  }
   h += '<div class="tally"><div class="tally-grid">'
-    +  '<div><span class="lab">Mejoras ('+t.nPlus+')</span><span class="fig plus" id="f-plus">'+cop(t.plus)+'</span></div>'
-    +  '<div><span class="lab">Renuncias ('+t.nMinus+')</span><span class="fig less" id="f-minus">'+cop(t.minus)+'</span></div>'
-    +  '<div><span class="lab">Estimado neto</span><span class="fig" id="f-net">'+cop(t.net)+'</span></div>'
+    +  '<div><span class="lab">Mejoras ('+t.nPlus+')</span><span class="fig plus">'+cop(t.plus)+'</span>'
+    +    sub(t.nQPlus, t.plus+t.qPlus) + pctLine(t.plus) + '</div>'
+    +  '<div><span class="lab">Renuncias ('+t.nMinus+')</span><span class="fig less">'+cop(t.minus)+'</span>'
+    +    sub(t.nQMinus, t.minus+t.qMinus) + pctLine(t.minus) + '</div>'
+    +  '<div><span class="lab">Estimado neto</span><span class="fig">'+cop(t.net)+'</span>'
+    +    sub(t.nQ, t.net+t.qPlus+t.qMinus) + pctLine(t.net) + '</div>'
     +  '<div class="acts no-print">'
     +    '<button class="btn" id="theme" type="button">Tema</button>'
     +    '<button class="btn" id="reset" type="button">Limpiar</button>'
@@ -754,6 +1019,22 @@ function render(){
     +    '<button class="btn primary" id="export" type="button">Descargar</button>'
     +  '</div></div>'
     +  '<div class="tally-note">Estimado sobre precios de 2023 · el valor real lo confirma tu asesor</div></div>';
+
+  /* precio del apartamento + filtros */
+  var fOpts = [["todo","Todo"],["ahora","Solo lo irreversible"],["pend","Sin decidir"]];
+  var fBtns = "";
+  for(var fi=0; fi<fOpts.length; fi++){
+    fBtns += '<button type="button" data-f="'+fOpts[fi][0]+'" aria-pressed="'
+      + (state.filtro===fOpts[fi][0]) + '">'+fOpts[fi][1]+'</button>';
+  }
+  h += '<div class="tools no-print">'
+    +  '<label class="precio"><span class="lab">Precio de tu apartamento <em>(opcional)</em></span>'
+    +    '<input id="precio" type="text" inputmode="numeric" placeholder="450.000.000" value="'
+    +      (state.precio ? state.precio.toString().replace(/\B(?=(\d{3})+(?!\d))/g,".") : "") + '">'
+    +  '</label>'
+    +  '<p class="privacy">Sirve para ver cada valor como porcentaje. Se guarda <b>solo en este navegador</b> y nunca viaja en el enlace que compartes.</p>'
+    +  '<div class="filtros"><span class="lab">Ver</span><div class="seg">'+fBtns+'</div></div>'
+    +  '</div>';
 
   /* como leer */
   h += '<div class="explain"><h2>Antes de empezar: hay dos cosas distintas aquí</h2>'
@@ -763,15 +1044,63 @@ function render(){
     +  '</div>';
 
   /* secciones */
+  var shown = 0;
   for(var s=0;s<GROUPS.length;s++){
     var G = GROUPS[s];
-    var rows = ITEMS.filter(function(it){ return it.g===G.k && applies(it.c); });
+    var rows = ITEMS.filter(function(it){ return it.g===G.k && applies(it.c) && visible(it); });
     if(!rows.length) continue;
+    shown += rows.length;
     h += '<section class="sec"><div class="sec-head"><span class="n">'+G.n+'</span><h2>'+G.t+'</h2></div>'
-      +  '<p class="sec-sub">'+G.s+'</p>';
+      +  '<p class="sec-sub">'+G.s+'</p>'
+      +  (G.note ? '<div class="secnote">'+G.note+'</div>' : '');
     for(var i=0;i<rows.length;i++) h += itemHTML(rows[i]);
     h += '</section>';
   }
+  if(!shown){
+    h += '<section class="sec"><div class="block"><p>'
+      + (state.filtro==="pend" ? "Ya decidiste todos los ítems de esta tipología."
+                               : "Ningún ítem coincide con el filtro.")
+      + ' Vuelve a <b>Todo</b> para verlos.</p></div></section>';
+  }
+
+  /* como te entregan el apartamento */
+  var renuncias = ITEMS.filter(function(it){
+    return it.neg && applies(it.c) && dec(it.c)==="si" && ENTREGA[it.c];
+  });
+  var dudas = ITEMS.filter(function(it){
+    return it.neg && applies(it.c) && dec(it.c)==="quiza" && ENTREGA[it.c];
+  });
+  h += '<section class="sec"><div class="sec-head"><span class="n">Consecuencia</span><h2>Así te entregan el apartamento</h2></div>'
+    +  '<p class="sec-sub">Lo que significa, en concreto, cada renuncia que marcaste. Sale del texto de la propia lista de precios.</p>'
+    +  '<div class="block">';
+  if(!renuncias.length && !dudas.length){
+    h += '<p>No has marcado ninguna renuncia, así que <b>te entregan el apartamento completo</b>, con todos sus acabados.</p>';
+  }else{
+    if(renuncias.length){
+      h += '<ul class="entrega">';
+      for(var e=0;e<renuncias.length;e++){
+        h += '<li><b>'+renuncias[e].c+'</b><span>'+ENTREGA[renuncias[e].c]+'</span></li>';
+      }
+      h += '</ul>';
+    }
+    if(dudas.length){
+      h += '<p class="dudastit">Y si además confirmas los que dejaste en quizá:</p><ul class="entrega duda">';
+      for(var e2=0;e2<dudas.length;e2++){
+        h += '<li><b>'+dudas[e2].c+'</b><span>'+ENTREGA[dudas[e2].c]+'</span></li>';
+      }
+      h += '</ul>';
+    }
+    h += '<p class="cierre">Todo lo anterior tendrías que hacerlo por tu cuenta después de la entrega.</p>';
+  }
+  h += '</div></section>';
+
+  /* preguntas para el asesor */
+  var qs = preguntas();
+  h += '<section class="sec"><div class="sec-head"><span class="n">Para la cita</span><h2>Preguntas para tu asesor</h2></div>'
+    +  '<p class="sec-sub">Generadas a partir de lo que marcaste. Van también en el archivo que descargas.</p>'
+    +  '<div class="block"><ol class="preguntas">';
+  for(var qi=0; qi<qs.length; qi++) h += '<li>'+esc(qs[qi])+'</li>';
+  h += '</ol></div></section>';
 
   /* cierre */
   h += '<section class="sec"><div class="sec-head"><span class="n">Fuera de lista</span><h2>Lo que no se puede cambiar</h2></div>'
@@ -835,6 +1164,30 @@ function exportTxt(){
   L.push("Mejoras:       " + cop(t.plus));
   L.push("Renuncias:     " + cop(t.minus));
   L.push("ESTIMADO NETO: " + cop(t.net));
+  if(t.nQ){
+    L.push("");
+    L.push("Si ademas confirmas los " + t.nQ + " que dejaste en quiza:");
+    if(t.nQPlus)  L.push("  Mejoras:       " + cop(t.plus + t.qPlus));
+    if(t.nQMinus) L.push("  Renuncias:     " + cop(t.minus + t.qMinus));
+    L.push("  ESTIMADO NETO: " + cop(t.net + t.qPlus + t.qMinus));
+  }
+  if(state.precio){
+    L.push("");
+    L.push("Precio del apartamento: " + cop(state.precio)
+      + "   (el neto es el " + pct(t.net) + " de ese valor)");
+  }
+
+  var ent = ITEMS.filter(function(it){
+    return it.neg && applies(it.c) && dec(it.c)==="si" && ENTREGA[it.c];
+  });
+  if(ent.length){
+    L.push("", "ASI ME ENTREGARIAN EL APARTAMENTO");
+    ent.forEach(function(it){ L.push("  " + it.c + "  " + ENTREGA[it.c]); });
+  }
+
+  L.push("", "PREGUNTAS PARA EL ASESOR");
+  preguntas().forEach(function(q, i){ L.push("  " + (i+1) + ". " + q); });
+
   L.push("", DISCLAIM);
 
   var blob = new Blob([L.join("\n")], {type:"text/plain;charset=utf-8"});
@@ -855,7 +1208,9 @@ function wire(){
   var app = document.getElementById("app");
 
   app.addEventListener("click", function(ev){
-    var b = ev.target.closest(".seg button");
+    /* [data-c] es obligatorio: los botones de filtro tambien viven
+       dentro de un .seg y si no, caerian aqui */
+    var b = ev.target.closest(".seg button[data-c]");
     if(b){
       var c = b.getAttribute("data-c");
       setDecision(c, b.getAttribute("data-v"));
@@ -873,6 +1228,14 @@ function wire(){
       });
       save(); render(); return;
     }
+    var fb = ev.target.closest(".filtros button");
+    if(fb){
+      state.filtro = fb.getAttribute("data-f");
+      render();
+      var again = document.querySelector('.filtros button[data-f="'+state.filtro+'"]');
+      if(again) again.focus({preventScroll:true});
+      return;
+    }
     if(ev.target.closest("#reset")){
       state.d = {}; state.n = {}; save(); render(); return;
     }
@@ -889,8 +1252,18 @@ function wire(){
 
   app.addEventListener("input", function(ev){
     var n = ev.target.closest(".note");
-    if(n){ state.n[n.getAttribute("data-c")] = n.value; save(); }
+    if(n){ state.n[n.getAttribute("data-c")] = n.value; save(); return; }
+    if(ev.target.id==="precio"){
+      state.precio = parsePrecio(ev.target.value);
+      save();
+      /* sin re-render: reventaria el foco y el cursor mientras escribe.
+         Los porcentajes se refrescan al salir del campo. */
+    }
   });
+
+  app.addEventListener("blur", function(ev){
+    if(ev.target.id==="precio"){ render(); }
+  }, true);
 
   app.addEventListener("change", function(ev){
     if(ev.target.id==="sel-tipo"){ state.tipo = parseInt(ev.target.value,10); save(); render(); }
@@ -898,7 +1271,7 @@ function wire(){
   });
 
   window.addEventListener("hashchange", function(){
-    if(readHash()) render();
+    if(readHash()){ sanitize(); render(); }
   });
 }
 
