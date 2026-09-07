@@ -57,6 +57,10 @@
 }
 
 *{box-sizing:border-box}
+/* Una regla de autor con `display` le gana a la del navegador para
+   [hidden]. Es obligatoria: .tour-pane es flex, y sin esto el panel
+   oculto se seguia pintando debajo del que si pediste. */
+[hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
 body{
   background:var(--ground); color:var(--ink); margin:0;
@@ -294,6 +298,7 @@ summary.sec-head::before{
 }
 details[open]>summary.sec-head{
   background:var(--surface); border-bottom-left-radius:0; border-bottom-right-radius:0;
+  border-bottom-color:var(--line-2);
 }
 details[open]>summary.sec-head::before{transform:rotate(90deg)}
 summary.sec-head:hover{background:var(--brand-soft)}
@@ -325,6 +330,19 @@ details[open]>summary.sec-head::after{content:"Plegar"}
   color:var(--ink-3); letter-spacing:.06em;
 }
 .sec-sub{color:var(--ink-2); font-size:13.5px; margin:0 0 16px; max-width:64ch}
+/* El cuerpo va en su propia caja, que continua la de la cabecera: sin
+   esto las tarjetas quedan sueltas y no se leen como parte de la
+   seccion plegable. El riel de 3px es el mismo de .tours y .explain. */
+.sec-body{
+  background:var(--ground);
+  border:1px solid var(--edge); border-top:none;
+  border-left:3px solid var(--brand);
+  border-radius:0 0 3px 3px;
+  padding:18px 18px 18px 20px;
+}
+.sec-body>*:last-child{margin-bottom:0}
+.sec-body>.block:first-child{margin-top:0}
+@media (max-width:640px){.sec-body{padding:12px 12px 12px 14px}}
 
 /* ============ RECORRIDOS 3D ============ */
 .tours{
@@ -591,6 +609,7 @@ ul.mirar li span{flex:1 1 240px; color:var(--ink-2); font-family:"IBM Plex Mono"
   .lock-m{font-size:12px; margin:0}
   summary.sec-head::before{display:none}
   details.sec{border-top:1px solid #999}
+  .sec-body{border:none; background:none; padding:0}
   body{background:#fff; font-size:11pt}
   .alert{background:#FFC53D!important; color:#000!important; -webkit-print-color-adjust:exact; print-color-adjust:exact}
   .tally{position:static}
@@ -1312,8 +1331,10 @@ function seccion(k, eyebrow, titulo, sub, cuerpo, resumen){
     +  '<summary class="sec-head"><span class="n">'+eyebrow+'</span><h2>'+titulo+'</h2>'
     +    (resumen ? '<span class="sum">'+resumen+'</span>' : '')
     +  '</summary>'
-    +  (sub ? '<p class="sec-sub">'+sub+'</p>' : '')
-    +  cuerpo
+    +  '<div class="sec-body">'
+    +    (sub ? '<p class="sec-sub">'+sub+'</p>' : '')
+    +    cuerpo
+    +  '</div>'
     +  '</details>';
 }
 
