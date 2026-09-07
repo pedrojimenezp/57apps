@@ -145,6 +145,20 @@ h1{
 }
 .price .pctline{text-align:right; font-weight:400}
 
+/* avisos bajo la barra de totales */
+.quitados{
+  background:var(--minus-soft); color:var(--ink);
+  border:1px solid var(--minus); border-top:none;
+  padding:10px 15px; font-size:13px; line-height:1.5;
+}
+.quitados b{color:var(--minus); font-weight:600}
+.grisnote{
+  background:var(--brand-soft); color:var(--ink);
+  border:1px solid var(--line); border-top:none; border-left:3px solid var(--brand);
+  padding:11px 15px; font-size:12.5px; line-height:1.5;
+}
+.grisnote b{font-weight:600}
+
 /* precio del apartamento + filtros */
 .tools{
   background:var(--surface); border:1px solid var(--line); border-top:none;
@@ -556,13 +570,13 @@ var ITEMS = [
  chips:[], flags:[["SOLO","Solo en las tipologías que traen vestier (19, 21, 22 y 24)."]]},
 
 {c:"8.12", g:"combo", t:"Piso de zona social + cocina completa", neg:true,
- needs:["8.01","8.02","8.03","8.05","8.07"], excl:["8.13","8.17","8.21"],
+ needs:["8.01","8.02","8.03","8.05","8.07"],
  base:"Piso en porcelanato en zona social, zócalo en madera, cocina completa con muebles, mesón en quarztone, lavaplatos, grifería, enchape, horno, cubierta y campana.",
  up:"Te descuentan el piso de la zona social, el zócalo en madera y el zócalo en porcelanato de cocina y ropas, más la cocina completa (muebles superior e inferior, barra auxiliar, mesón, lavaplatos, grifería, enchape entre muebles, horno, cubierta, campana y rebanco).<br><br>Quedan las salidas eléctricas de horno, campana, microondas y barra, y las hidrosanitarias del lavaplatos, con tapón. El balcón se entrega enchapado para conservar el acabado de fachada.",
  chips:["Excluyente"], flags:[]},
 
 {c:"8.13", g:"combo", t:"Piso de zona social + barra auxiliar", neg:true,
- needs:["8.01","8.02","8.03","8.05","8.07"], excl:["8.12","8.21"],
+ needs:["8.01","8.02","8.03","8.05","8.07"],
  base:"Piso en porcelanato en zona social con su zócalo, y barra auxiliar con su mesón.",
  up:"Te descuentan el piso de la zona social, el zócalo en madera, el zócalo en porcelanato de cocina y ropas, y la barra auxiliar con su mesón. La cocina sí te la instalan. El balcón se entrega enchapado.",
  chips:["Excluyente"], flags:[]},
@@ -583,7 +597,7 @@ var ITEMS = [
  up:"El mismo descuento del 8.15 aplicado al baño principal. Se entrega en revoque y mortero, con los desagües tapados y las salidas de agua a la altura del abasto.",
  chips:[], flags:[]},
 
-{c:"8.17", g:"combo", t:"Cocina completa", neg:true, excl:["8.12","8.21"],
+{c:"8.17", g:"combo", t:"Cocina completa", neg:true,
  base:"Cocina completa instalada con muebles, barra, mesón, lavaplatos, grifería, enchape, horno, cubierta y campana.",
  up:"Te descuentan muebles superior e inferior, barra auxiliar, mesón en quarztone, lavaplatos, grifería, enchape entre muebles, horno, cubierta, campana y rebanco. El piso de la zona social sí te lo instalan.<br><br>Quedan las salidas eléctricas e hidrosanitarias con tapón.",
  chips:["Excluyente"], flags:[]},
@@ -596,7 +610,7 @@ var ITEMS = [
 {c:"8.19", g:"combo", t:"Calentador de paso 5.5 lt", neg:true,
  base:"Calentador de paso de 5.5 litros instalado.", up:"No te lo instalan y te reconocen su valor.", chips:[], flags:[]},
 
-{c:"8.21", g:"combo", t:"Barra auxiliar", neg:true, excl:["8.12","8.13","8.17"],
+{c:"8.21", g:"combo", t:"Barra auxiliar", neg:true,
  base:"Barra auxiliar con mesón de cocina en quarztone.",
  up:"Te descuentan la barra auxiliar con su mesón en quarztone. Todo lo demás de la cocina sí te lo instalan.",
  chips:["Excluyente"], flags:[]},
@@ -607,6 +621,58 @@ var ITEMS = [
  chips:["Anula todo el grupo 8"],
  flags:[["STOP","Esta opción ya incluye todas las demás renuncias, así que al marcarla se desmarcan las otras. No es plata gratis: recibes un apartamento sin acabados y tendrás que hacerlos por tu cuenta."]]}
 ];
+
+/* ---------------------------------------------------------------
+   CONFLICTOS. Si una renuncia retira la pieza fisica sobre la que
+   actua una mejora, las dos no pueden convivir: estarias pagando por
+   mejorar algo que pediste que no te instalen. Sale del texto de la
+   hoja.
+
+   Los pares son BIDIRECCIONALES: el indice se construye simetrico
+   para que marcar desde cualquiera de los dos lados haga lo mismo.
+----------------------------------------------------------------*/
+var PARES_CHOCAN = [
+  /* dentro del grupo 8: cubren la misma obra */
+  ["8.12","8.13"], ["8.12","8.17"], ["8.12","8.21"],
+  ["8.13","8.21"], ["8.17","8.21"],
+  /* la renuncia retira justo lo que la mejora quiere mejorar */
+  ["8.12","3.01"], ["8.12","3.02"],   /* retira la cocina completa */
+  ["8.17","3.01"], ["8.17","3.02"],   /* retira la cocina completa */
+  ["8.14","2.01"],                    /* retira el piso de habitaciones */
+  ["8.15","7.01"],                    /* retira el bano social */
+  ["8.16","7.02"]                     /* retira el bano principal */
+];
+
+/* Se solapan solo en parte: la mejora sigue teniendo sentido sobre lo
+   que la renuncia NO retira. Avisan, no bloquean. */
+var PARCIALES = [
+  ["8.12","2.02","El 2.02 pone zócalo en habitaciones y en zona social, pero esta renuncia retira el de la zona social. Solo te quedaría el de las habitaciones."],
+  ["8.13","2.02","El 2.02 pone zócalo en habitaciones y en zona social, pero esta renuncia retira el de la zona social. Solo te quedaría el de las habitaciones."],
+  ["8.14","2.02","Esta renuncia retira el zócalo de las habitaciones. Del 2.02 solo te quedaría el de la zona social."],
+  ["8.13","3.02","El 3.02 incluye el lateral y el frente de la barra, y esta renuncia retira la barra. El resto del paquete sí aplica."],
+  ["8.21","3.02","El 3.02 incluye el lateral y el frente de la barra, y esta renuncia retira la barra. El resto del paquete sí aplica."],
+  ["8.15","5.03","El baño social quedaría en obra, pero la preinstalación del extractor sobrevive. Confirma con tu asesor que te la dejen."],
+  ["8.16","5.04","El baño principal quedaría en obra, pero la preinstalación del extractor sobrevive. Confirma con tu asesor que te la dejen."],
+  ["8.18","6.01","Esta renuncia retira el lavadero, pero la salida de agua caliente para la lavadora sigue teniendo sentido."]
+];
+
+var CHOCA = {}, PARCIAL = {};
+(function(){
+  function liga(a,b){
+    if(a===b) return;
+    (CHOCA[a] = CHOCA[a] || []).push(b);
+    (CHOCA[b] = CHOCA[b] || []).push(a);
+  }
+  for(var i=0;i<PARES_CHOCAN.length;i++) liga(PARES_CHOCAN[i][0], PARES_CHOCAN[i][1]);
+  /* 8.20 entrega el apartamento en obra gris: choca con todo lo demas */
+  for(var j=0;j<ITEMS.length;j++) if(ITEMS[j].c!=="8.20") liga("8.20", ITEMS[j].c);
+
+  for(var k=0;k<PARCIALES.length;k++){
+    var a=PARCIALES[k][0], b=PARCIALES[k][1], m=PARCIALES[k][2];
+    (PARCIAL[a] = PARCIAL[a] || []).push([b,m]);
+    (PARCIAL[b] = PARCIAL[b] || []).push([a,m]);
+  }
+})();
 
 /* ---------------------------------------------------------------
    REVERSIBILIDAD — que tan dificil es hacer esta obra DESPUES de
@@ -744,16 +810,12 @@ function save(){
 }
 /* El hash y el localStorage pueden traer combinaciones imposibles: un
    enlace editado a mano, o guardado antes de que existieran estas
-   reglas. Sin depurar, dos renuncias que se pisan se sumarian dos
-   veces. 8.20 gana sobre todo el grupo 8; entre las demas, gana la
-   primera en el orden de ITEMS, que es estable. */
+   reglas. Sin depurar, una renuncia y la mejora de lo mismo se
+   sumarian a la vez.
+   Gana la primera en el orden de ITEMS, que es estable; como las
+   mejoras van antes que las renuncias, ante un enlace corrupto
+   sobrevive la mejora, que es la lectura menos destructiva. */
 function sanitize(){
-  if(dec("8.20")==="si" && applies("8.20")){
-    for(var i=0;i<ITEMS.length;i++){
-      if(ITEMS[i].neg && ITEMS[i].c!=="8.20") state.d[ITEMS[i].c] = "";
-    }
-    return;
-  }
   var kept = [];
   for(var j=0;j<ITEMS.length;j++){
     var it = ITEMS[j];
@@ -804,15 +866,13 @@ function needsOf(it){
 }
 /* items que chocan con este: los declarados, mas 8.20 contra todo el grupo 8 */
 function conflictsOf(it){
-  var out = (it.excl||[]).slice();
-  if(it.c==="8.20"){
-    for(var i=0;i<ITEMS.length;i++){
-      if(ITEMS[i].neg && ITEMS[i].c!=="8.20" && applies(ITEMS[i].c)) out.push(ITEMS[i].c);
-    }
-  }else if(it.neg && applies("8.20")){
-    out.push("8.20");
-  }
-  return out.filter(applies);
+  return (CHOCA[it.c] || []).filter(applies);
+}
+/* choques parciales: se solapan a medias, solo avisan */
+function parcialesDe(it){
+  return (PARCIAL[it.c] || []).filter(function(p){
+    return applies(p[0]) && dec(p[0])==="si";
+  });
 }
 function blockedBy(it){
   var cf = conflictsOf(it), hit = [];
@@ -907,6 +967,7 @@ function preguntas(){
 
   if(dec("8.20")==="si"){
     q.push("Si recibo el apartamento en obra gris, ¿qué pasa con la garantía y con los permisos para hacer la obra por dentro?");
+    q.push("El 8.20 dice que deja las salidas eléctricas e hidrosanitarias. ¿Puedo pedir aparte las tomas del balcón, la salida de gas, el agua caliente de la lavadora y las preinstalaciones de extractor (5.01 a 5.04, 6.01 y 6.02)? Después implican romper muro.");
   }
 
   var pre = sel.filter(function(it){ return it.c==="5.03" || it.c==="5.04"; });
@@ -959,11 +1020,29 @@ function itemHTML(it){
   }
 
   if(blk.length){
-    h += '<div class="flag stop"><span class="mk">BLOQUEADO</span><span>Ya marcaste el <b>'
-      +  blk.join('</b> y el <b>')+'</b>, que cubre'+(blk.length>1?"n":"")+' lo mismo. Desmárcalo si prefieres esta opción.</span></div>';
+    var cods = '<b>'+blk.join('</b>, <b>')+'</b>', varios = blk.length>1, msg;
+    var blkNeg = blk.filter(function(x){ var o=itemBy(x); return o && o.neg; }).length === blk.length;
+    if(!it.neg && blkNeg){
+      msg = 'Estás renunciando a '+cods+', así que eso no te lo van a instalar y esta mejora no aplica. '
+          + 'Suelta '+(varios?'esas renuncias':'esa renuncia')+' si quieres la mejora.';
+    }else if(it.neg && !blkNeg){
+      msg = 'Marcaste '+cods+', que son mejoras sobre justo lo que aquí estás quitando. '
+          + 'Suelta '+(varios?'esas mejoras':'esa mejora')+' antes de renunciar.';
+    }else{
+      msg = 'Ya marcaste '+cods+', que cubre'+(varios?'n':'')+' lo mismo. '
+          + 'Desmárcalo si prefieres esta opción.';
+    }
+    h += '<div class="flag stop"><span class="mk">BLOQUEADO</span><span>'+msg+'</span></div>';
+  }
+  var parc = parcialesDe(it);
+  for(var pz=0; pz<parc.length; pz++){
+    h += '<div class="flag warn"><span class="mk">A MEDIAS</span><span>Choca en parte con el <b>'
+      +  parc[pz][0]+'</b>. '+parc[pz][1]+'</span></div>';
   }
   if(miss.length){
-    h += '<div class="flag warn"><span class="mk">FALTA</span><span>Esta renuncia exige incluir también el <b>'
+    h += '<div class="flag warn"><span class="mk">FALTA</span><span>'
+      +  (it.neg ? 'Esta renuncia exige' : 'Esta mejora exige')
+      +  ' incluir también el <b>'
       +  miss.join('</b>, el <b>')+'</b>.</span>'
       +  '<button type="button" class="fix no-print" data-add="'+miss.join(",")+'">Añadir</button></div>';
   }
@@ -1019,6 +1098,24 @@ function render(){
     +    '<button class="btn primary" id="export" type="button">Descargar</button>'
     +  '</div></div>'
     +  '<div class="tally-note">Estimado sobre precios de 2023 · el valor real lo confirma tu asesor</div></div>';
+
+  /* que se quito al marcar algo que choca */
+  if(quitados && quitados.lista.length){
+    var qn = quitados.lista.length;
+    h += '<div class="quitados no-print"><b>Se '+(qn>1?'quitaron ':'quitó ')+qn+' '
+      +  (qn>1?'ítems':'ítem')+' que ya no aplican:</b> '+quitados.lista.join(', ')
+      +  '. No pueden convivir con el '+quitados.por+'.</div>';
+    quitados = null;
+  }
+
+  /* obra gris: lo que la hoja si deja, aunque aqui no se pueda marcar */
+  if(dec("8.20")==="si"){
+    h += '<div class="grisnote"><b>Ojo con las salidas.</b> La hoja dice que el 8.20 entrega '
+      +  '«con los desagües tapados y las salidas eléctricas e hidrosanitarias dejadas». '
+      +  'Las tomas del balcón, el gas del asador, el agua caliente de la lavadora y las preinstalaciones '
+      +  'de extractor (5.01 a 5.04, 6.01 y 6.02) son obra embebida: después implican romper muro. '
+      +  'Aquí quedan bloqueadas, pero <b>pregúntale a tu asesor si puedes pedirlas aparte</b>.</div>';
+  }
 
   /* precio del apartamento + filtros */
   var fOpts = [["todo","Todo"],["ahora","Solo lo irreversible"],["pend","Sin decidir"]];
@@ -1123,14 +1220,23 @@ function render(){
 }
 
 /* --------------------- interacciones ---------------------- */
+/* Transitorio a proposito: no va en state, para que no se guarde ni
+   viaje en la URL. Solo vive hasta el siguiente render. */
+var quitados = null;
+
 function setDecision(c, v){
   var it = itemBy(c);
   if(!it) return;
+  quitados = null;
   if(state.d[c] === v){ state.d[c] = ""; save(); render(); return; }
   if(v === "si"){
-    /* al marcar, limpiar lo que choca con este item */
-    var cf = conflictsOf(it);
-    for(var i=0;i<cf.length;i++) if(state.d[cf[i]]==="si") state.d[cf[i]] = "";
+    /* al marcar, soltar lo que choca con este item */
+    var cf = conflictsOf(it), fuera = [];
+    for(var i=0;i<cf.length;i++){
+      if(state.d[cf[i]]==="si"){ state.d[cf[i]] = ""; fuera.push(cf[i]); }
+    }
+    /* sin avisar, marcar 8.20 borraria la seleccion entera en silencio */
+    if(fuera.length) quitados = {por:c, lista:fuera.sort()};
   }
   state.d[c] = v;
   save();
