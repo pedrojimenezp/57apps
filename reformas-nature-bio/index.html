@@ -22,6 +22,7 @@
   --minus:#9C3A2E; --minus-soft:#F6E4E1;
   --alert:#FFC53D; --alert-ink:#2A1F00; --alert-edge:#B07E00;
   --shadow:0 1px 2px rgba(20,32,43,.07);
+  --scrim:rgba(238,242,246,.90);
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
@@ -35,6 +36,8 @@
     --minus:#E0857A; --minus-soft:#33201D;
     --alert:#FFC53D; --alert-ink:#2A1F00; --alert-edge:#8A6400;
     --shadow:0 1px 2px rgba(0,0,0,.35);
+  --scrim:rgba(14,19,25,.92);
+    --scrim:rgba(14,19,25,.92);
   }
 }
 :root[data-theme="dark"]{
@@ -242,7 +245,30 @@ button{font:inherit; cursor:pointer}
 
 /* ============ SECTIONS ============ */
 .sec{margin:38px 0 0}
-.sec-head{display:flex; align-items:baseline; gap:12px; margin:0 0 4px; flex-wrap:wrap}
+details.sec{border-top:2px solid var(--ink); padding-top:2px}
+summary.sec-head{
+  list-style:none; cursor:pointer; padding:11px 4px 10px;
+  display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+}
+summary.sec-head::-webkit-details-marker{display:none}
+summary.sec-head::before{
+  content:"\25B8"; color:var(--brand); font-size:15px; line-height:1; flex:none;
+  transition:transform .15s; display:inline-block; align-self:center; width:12px;
+}
+details[open]>summary.sec-head::before{transform:rotate(90deg)}
+summary.sec-head:hover{background:var(--surface-2)}
+summary.sec-head:focus-visible{outline:2px solid var(--brand); outline-offset:-2px}
+.sum{
+  margin-left:auto; display:flex; gap:6px; flex-wrap:wrap; align-items:center;
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px;
+}
+.sum>span{padding:2px 7px; border-radius:2px; white-space:nowrap}
+.sum-n{background:var(--no-soft); color:var(--ink-2)}
+.sum-off{background:transparent; color:var(--ink-3)}
+.sum-ok{background:var(--si-soft); color:var(--si)}
+.sum-v{background:transparent; color:var(--ink); font-weight:500; font-variant-numeric:tabular-nums}
+.sum-b{background:var(--minus-soft); color:var(--minus); font-weight:600}
+.sum-w{background:var(--quiza-soft); color:var(--quiza); font-weight:600}
 .sec-head h2{
   font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif;
   font-weight:700; font-size:22px; letter-spacing:-.01em; margin:0;
@@ -270,7 +296,34 @@ button{font:inherit; cursor:pointer}
 .item[data-d="si"]{border-left-color:var(--si)}
 .item[data-d="quiza"]{border-left-color:var(--quiza)}
 .item[data-d="no"]{border-left-color:var(--no); opacity:.6}
-.item.blocked{opacity:.5}
+.item.blocked{position:relative}
+.lock{
+  position:absolute; inset:0; z-index:5; background:var(--scrim);
+  display:flex; align-items:center; justify-content:center;
+  padding:18px; text-align:center; pointer-events:auto;
+}
+/* panel solido: con solo el scrim, el texto de la tarjeta se cuela
+   detras del mensaje justo donde hay que leerlo */
+.lock-in{
+  max-width:52ch; background:var(--surface); border:2px solid var(--minus);
+  border-radius:3px; padding:20px 24px; box-shadow:0 4px 20px rgba(0,0,0,.14);
+}
+.lock-t{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif;
+  font-weight:700; font-size:clamp(24px,4.5vw,34px); line-height:1;
+  letter-spacing:.02em; text-transform:uppercase; color:var(--minus);
+  margin:0 0 10px;
+}
+.lock-m{margin:0 0 14px; font-size:14px; line-height:1.5; color:var(--ink)}
+.lock-m b{font-family:"IBM Plex Mono",ui-monospace,monospace; font-weight:600}
+.lock-b{
+  background:var(--minus); color:var(--surface); border:1px solid var(--minus);
+  border-radius:2px; padding:8px 16px; font-size:13px; font-weight:600;
+}
+.lock-b:hover{filter:brightness(1.12)}
+.lock-b:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
+.item.blocked .seg button[disabled],
+.item.blocked .note[disabled]{cursor:default}
 .item-top{display:flex; flex-wrap:wrap; align-items:flex-start; gap:9px 16px; padding:13px 16px 11px}
 .code{
   font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12px; font-weight:600;
@@ -367,6 +420,12 @@ button{font:inherit; cursor:pointer}
 
 @media print{
   .no-print{display:none!important}
+  .lock{position:static; background:none; padding:10px 16px; text-align:left; border-top:1px solid var(--line)}
+  .lock-in{max-width:none; background:none; border:none; box-shadow:none; padding:0}
+  .lock-t{font-size:15px; margin-bottom:4px}
+  .lock-m{font-size:12px; margin:0}
+  summary.sec-head::before{display:none}
+  details.sec{border-top:1px solid #999}
   body{background:#fff; font-size:11pt}
   .alert{background:#FFC53D!important; color:#000!important; -webkit-print-color-adjust:exact; print-color-adjust:exact}
   .tally{position:static}
@@ -776,7 +835,32 @@ var DISCLAIM = "AVISO: precios de la lista 2023, herramienta NO OFICIAL, solo un
    NUNCA entra en el hash — es dato financiero personal y estos
    enlaces estan hechos para compartirse. Vive solo en localStorage.
    filtro: solo afecta que se pinta, nunca las decisiones ni los totales. */
-var state = {tipo:22, piso:21, d:{}, n:{}, precio:0, filtro:"todo"};
+var state = {tipo:22, piso:21, d:{}, n:{}, precio:0, filtro:"todo", abierto:null};
+
+/* Abierto/plegado por seccion. En memoria, igual que filtro: es
+   preferencia de vista, y volver y encontrar media pagina plegada sin
+   saber por que es peor que volver a plegarla. render() reemplaza el
+   innerHTML entero, asi que tiene que salir de aqui o se perderia en
+   cada clic. */
+function abiertoPorDefecto(){
+  var o = {};
+  for(var i=0;i<GROUPS.length;i++) o[GROUPS[i].k] = GROUPS[i].kind === "up";
+  o.entrega = true; o.preguntas = true; o.fuera = true;
+  return o;
+}
+function estaAbierto(k){
+  if(state.filtro !== "todo") return true;  /* con filtro, todo abierto */
+  if(!state.abierto) state.abierto = abiertoPorDefecto();
+  return !!state.abierto[k];
+}
+function setAbierto(k, v){
+  if(!state.abierto) state.abierto = abiertoPorDefecto();
+  state.abierto[k] = v;
+}
+function todasLasSecciones(){
+  var ks = GROUPS.map(function(g){ return g.k; });
+  return ks.concat(["entrega","preguntas","fuera"]);
+}
 
 /* ---------------------- persistencia ---------------------- */
 function readHash(){
@@ -979,6 +1063,38 @@ function preguntas(){
 }
 
 /* ------------------------- render ------------------------- */
+/* Cabecera de seccion. Plegar no puede esconder informacion, asi que
+   el summary lleva lo justo para decidir si vale la pena abrir. */
+function resumenSeccion(rows){
+  var n=rows.length, elegidos=0, sub=0, blo=0, falt=0, med=0;
+  for(var i=0;i<rows.length;i++){
+    var it=rows[i];
+    if(dec(it.c)==="si"){ elegidos++; sub += priceOf(it.c); }
+    if(blockedBy(it).length) blo++;
+    if(missingNeeds(it).length) falt++;
+    if(parcialesDe(it).length) med++;
+  }
+  var s = '<span class="sum-n">'+n+' '+(n===1?'ítem':'ítems')+'</span>';
+  s += elegidos
+     ? '<span class="sum-ok">'+elegidos+' '+(elegidos===1?'elegido':'elegidos')+'</span>'
+       + '<span class="sum-v">'+cop(sub)+'</span>'
+     : '<span class="sum-off">sin decidir</span>';
+  if(blo)  s += '<span class="sum-b">'+blo+' bloqueado'+(blo>1?'s':'')+'</span>';
+  if(falt) s += '<span class="sum-w">'+falt+' sin requisitos</span>';
+  if(med)  s += '<span class="sum-w">'+med+' a medias</span>';
+  return s;
+}
+
+function seccion(k, eyebrow, titulo, sub, cuerpo, resumen){
+  return '<details class="sec"'+(estaAbierto(k)?' open':'')+' data-sec="'+k+'">'
+    +  '<summary class="sec-head"><span class="n">'+eyebrow+'</span><h2>'+titulo+'</h2>'
+    +    (resumen ? '<span class="sum">'+resumen+'</span>' : '')
+    +  '</summary>'
+    +  (sub ? '<p class="sec-sub">'+sub+'</p>' : '')
+    +  cuerpo
+    +  '</details>';
+}
+
 /* El filtro solo decide que se pinta. Nunca toca state.d ni totals(). */
 function visible(it){
   if(state.filtro==="ahora") return revOf(it.c)==="ahora";
@@ -1019,21 +1135,6 @@ function itemHTML(it){
       +  ' <i>Esto lo estima esta página; la lista de precios no dice nada sobre reversibilidad.</i></span></div>';
   }
 
-  if(blk.length){
-    var cods = '<b>'+blk.join('</b>, <b>')+'</b>', varios = blk.length>1, msg;
-    var blkNeg = blk.filter(function(x){ var o=itemBy(x); return o && o.neg; }).length === blk.length;
-    if(!it.neg && blkNeg){
-      msg = 'Estás renunciando a '+cods+', así que eso no te lo van a instalar y esta mejora no aplica. '
-          + 'Suelta '+(varios?'esas renuncias':'esa renuncia')+' si quieres la mejora.';
-    }else if(it.neg && !blkNeg){
-      msg = 'Marcaste '+cods+', que son mejoras sobre justo lo que aquí estás quitando. '
-          + 'Suelta '+(varios?'esas mejoras':'esa mejora')+' antes de renunciar.';
-    }else{
-      msg = 'Ya marcaste '+cods+', que cubre'+(varios?'n':'')+' lo mismo. '
-          + 'Desmárcalo si prefieres esta opción.';
-    }
-    h += '<div class="flag stop"><span class="mk">BLOQUEADO</span><span>'+msg+'</span></div>';
-  }
   var parc = parcialesDe(it);
   for(var pz=0; pz<parc.length; pz++){
     h += '<div class="flag warn"><span class="mk">A MEDIAS</span><span>Choca en parte con el <b>'
@@ -1047,13 +1148,37 @@ function itemHTML(it){
       +  '<button type="button" class="fix no-print" data-add="'+miss.join(",")+'">Añadir</button></div>';
   }
 
+  /* Con la tarjeta bloqueada los controles van disabled: taparlos
+     visualmente no basta, seguirian siendo enfocables con el tabulador. */
+  var off = blk.length ? ' disabled' : '';
   h += '<div class="decide"><div class="seg" role="group" aria-label="Decisión ítem '+it.c+'">';
   var opts = it.neg ? [["si","Renuncio"],["quiza","Quizá"],["no","La conservo"]]
                     : [["si","Sí"],["quiza","Quizá"],["no","No"]];
   for(var k2=0;k2<opts.length;k2++){
-    h += '<button type="button" data-c="'+it.c+'" data-v="'+opts[k2][0]+'" aria-pressed="'+(d===opts[k2][0])+'">'+opts[k2][1]+'</button>';
+    h += '<button type="button" data-c="'+it.c+'" data-v="'+opts[k2][0]+'" aria-pressed="'+(d===opts[k2][0])+'"'+off+'>'+opts[k2][1]+'</button>';
   }
-  h += '</div><input class="note" type="text" data-c="'+it.c+'" placeholder="Nota…" value="'+esc(state.n[it.c]||"")+'"></div>';
+  h += '</div><input class="note" type="text" data-c="'+it.c+'" placeholder="Nota…" value="'+esc(state.n[it.c]||"")+'"'+off+'></div>';
+
+  if(blk.length){
+    var cods = '<b>'+blk.join('</b>, <b>')+'</b>', varios = blk.length>1, msg;
+    var blkNeg = blk.filter(function(x){ var o=itemBy(x); return o && o.neg; }).length === blk.length;
+    if(!it.neg && blkNeg){
+      msg = 'Estás renunciando a '+cods+', así que eso no te lo van a instalar y esta mejora no aplica.';
+    }else if(it.neg && !blkNeg){
+      msg = 'Marcaste '+cods+', que '+(varios?'son mejoras':'es una mejora')+' sobre justo lo que aquí estás quitando.';
+    }else{
+      msg = 'Ya marcaste '+cods+', que cubre'+(varios?'n':'')+' lo mismo.';
+    }
+    var quitaTxt = blk.map(function(x){
+      var o = itemBy(x);
+      return (o && o.neg ? 'la renuncia ' : 'la mejora ') + x;
+    }).join(' y ');
+    h += '<div class="lock"><div class="lock-in">'
+      +    '<p class="lock-t">Bloqueado</p>'
+      +    '<p class="lock-m">'+msg+'</p>'
+      +    '<button type="button" class="lock-b no-print" data-drop="'+blk.join(",")+'">Quitar '+quitaTxt+'</button>'
+      +  '</div></div>';
+  }
   return h + '</article>';
 }
 
@@ -1125,6 +1250,10 @@ function render(){
       + (state.filtro===fOpts[fi][0]) + '">'+fOpts[fi][1]+'</button>';
   }
   h += '<div class="tools no-print">'
+    +  '<div class="filtros"><span class="lab">Secciones</span><div class="seg">'
+    +    '<button type="button" data-todas="1">Expandir todo</button>'
+    +    '<button type="button" data-todas="0">Plegar todo</button>'
+    +  '</div></div>'
     +  '<label class="precio"><span class="lab">Precio de tu apartamento <em>(opcional)</em></span>'
     +    '<input id="precio" type="text" inputmode="numeric" placeholder="450.000.000" value="'
     +      (state.precio ? state.precio.toString().replace(/\B(?=(\d{3})+(?!\d))/g,".") : "") + '">'
@@ -1147,17 +1276,15 @@ function render(){
     var rows = ITEMS.filter(function(it){ return it.g===G.k && applies(it.c) && visible(it); });
     if(!rows.length) continue;
     shown += rows.length;
-    h += '<section class="sec"><div class="sec-head"><span class="n">'+G.n+'</span><h2>'+G.t+'</h2></div>'
-      +  '<p class="sec-sub">'+G.s+'</p>'
-      +  (G.note ? '<div class="secnote">'+G.note+'</div>' : '');
-    for(var i=0;i<rows.length;i++) h += itemHTML(rows[i]);
-    h += '</section>';
+    var cuerpo = (G.note ? '<div class="secnote">'+G.note+'</div>' : '');
+    for(var i=0;i<rows.length;i++) cuerpo += itemHTML(rows[i]);
+    h += seccion(G.k, G.n, G.t, G.s, cuerpo, resumenSeccion(rows));
   }
   if(!shown){
-    h += '<section class="sec"><div class="block"><p>'
+    h += '<div class="sec"><div class="block"><p>'
       + (state.filtro==="pend" ? "Ya decidiste todos los ítems de esta tipología."
                                : "Ningún ítem coincide con el filtro.")
-      + ' Vuelve a <b>Todo</b> para verlos.</p></div></section>';
+      + ' Vuelve a <b>Todo</b> para verlos.</p></div></div>';
   }
 
   /* como te entregan el apartamento */
@@ -1167,50 +1294,56 @@ function render(){
   var dudas = ITEMS.filter(function(it){
     return it.neg && applies(it.c) && dec(it.c)==="quiza" && ENTREGA[it.c];
   });
-  h += '<section class="sec"><div class="sec-head"><span class="n">Consecuencia</span><h2>Así te entregan el apartamento</h2></div>'
-    +  '<p class="sec-sub">Lo que significa, en concreto, cada renuncia que marcaste. Sale del texto de la propia lista de precios.</p>'
-    +  '<div class="block">';
+  var cEnt = '<div class="block">';
   if(!renuncias.length && !dudas.length){
-    h += '<p>No has marcado ninguna renuncia, así que <b>te entregan el apartamento completo</b>, con todos sus acabados.</p>';
+    cEnt += '<p>No has marcado ninguna renuncia, así que <b>te entregan el apartamento completo</b>, con todos sus acabados.</p>';
   }else{
     if(renuncias.length){
-      h += '<ul class="entrega">';
+      cEnt += '<ul class="entrega">';
       for(var e=0;e<renuncias.length;e++){
-        h += '<li><b>'+renuncias[e].c+'</b><span>'+ENTREGA[renuncias[e].c]+'</span></li>';
+        cEnt += '<li><b>'+renuncias[e].c+'</b><span>'+ENTREGA[renuncias[e].c]+'</span></li>';
       }
-      h += '</ul>';
+      cEnt += '</ul>';
     }
     if(dudas.length){
-      h += '<p class="dudastit">Y si además confirmas los que dejaste en quizá:</p><ul class="entrega duda">';
+      cEnt += '<p class="dudastit">Y si además confirmas los que dejaste en quizá:</p><ul class="entrega duda">';
       for(var e2=0;e2<dudas.length;e2++){
-        h += '<li><b>'+dudas[e2].c+'</b><span>'+ENTREGA[dudas[e2].c]+'</span></li>';
+        cEnt += '<li><b>'+dudas[e2].c+'</b><span>'+ENTREGA[dudas[e2].c]+'</span></li>';
       }
-      h += '</ul>';
+      cEnt += '</ul>';
     }
-    h += '<p class="cierre">Todo lo anterior tendrías que hacerlo por tu cuenta después de la entrega.</p>';
+    cEnt += '<p class="cierre">Todo lo anterior tendrías que hacerlo por tu cuenta después de la entrega.</p>';
   }
-  h += '</div></section>';
+  cEnt += '</div>';
+  var nEnt = renuncias.length + dudas.length;
+  h += seccion('entrega', 'Consecuencia', 'Así te entregan el apartamento',
+       'Lo que significa, en concreto, cada renuncia que marcaste. Sale del texto de la propia lista de precios.',
+       cEnt,
+       nEnt ? '<span class="sum-b">'+nEnt+' '+(nEnt===1?'zona afectada':'zonas afectadas')+'</span>'
+            : '<span class="sum-ok">apartamento completo</span>');
 
   /* preguntas para el asesor */
   var qs = preguntas();
-  h += '<section class="sec"><div class="sec-head"><span class="n">Para la cita</span><h2>Preguntas para tu asesor</h2></div>'
-    +  '<p class="sec-sub">Generadas a partir de lo que marcaste. Van también en el archivo que descargas.</p>'
-    +  '<div class="block"><ol class="preguntas">';
-  for(var qi=0; qi<qs.length; qi++) h += '<li>'+esc(qs[qi])+'</li>';
-  h += '</ol></div></section>';
+  var cQ = '<div class="block"><ol class="preguntas">';
+  for(var qi=0; qi<qs.length; qi++) cQ += '<li>'+esc(qs[qi])+'</li>';
+  cQ += '</ol></div>';
+  h += seccion('preguntas', 'Para la cita', 'Preguntas para tu asesor',
+       'Generadas a partir de lo que marcaste. Van también en el archivo que descargas.',
+       cQ, '<span class="sum-n">'+qs.length+' preguntas</span>');
 
   /* cierre */
-  h += '<section class="sec"><div class="sec-head"><span class="n">Fuera de lista</span><h2>Lo que no se puede cambiar</h2></div>'
-    +  '<div class="block"><p>Si en los renders ves alternativas para algo de esta lista, no vienen de la lista de precios de reformas. Pregúntale a tu asesor de dónde salen.</p><ul>';
+  var cF = '<div class="block"><p>Si en los renders ves alternativas para algo de esta lista, no vienen de la lista de precios de reformas. Pregúntale a tu asesor de dónde salen.</p><ul>';
   for(var q=0;q<NO_UPGRADE.length;q++){
-    h += '<li><b>'+esc(NO_UPGRADE[q][0])+'</b><span>'+esc(NO_UPGRADE[q][1])+'</span></li>';
+    cF += '<li><b>'+esc(NO_UPGRADE[q][0])+'</b><span>'+esc(NO_UPGRADE[q][1])+'</span></li>';
   }
-  h += '</ul></div>'
+  cF += '</ul></div>'
     +  '<div class="block"><h3>Tres cosas que conviene saber</h3>'
     +  '<p>Todas las referencias de la lista dicen <b>«o similar»</b>. La constructora puede entregar referencias equivalentes en aparatos, electrodomésticos, colores de enchapes, mesones y carpintería según la disponibilidad del proveedor a la fecha de entrega. <b>Los renders son referenciales, no contractuales.</b></p>'
     +  '<p>En seis ítems la lista de precios <b>no dice cuál es el acabado que estás reemplazando</b>, solo a qué cambias. Esas filas lo advierten en vez de suponerlo.</p>'
     +  '<p>La lista tampoco aclara si el saldo se descuenta del precio de venta o se paga aparte; solo advierte que si te retiras del negocio o no te aprueban el crédito hipotecario, no devuelven dineros de reformas.</p>'
-    +  '</div></section>';
+    +  '</div>';
+  h += seccion('fuera', 'Fuera de lista', 'Lo que no se puede cambiar', '', cF,
+       '<span class="sum-n">'+NO_UPGRADE.length+' cosas fijas</span>');
 
   h += '<p class="foot">Herramienta no oficial, sin relación con la constructora. Construida sobre la lista de precios de reformas de 2023, Torre 4.<br>'
     +  'Vista actual: '+esc(sheet)+' · '+t.pend+' ítems sin decidir.<br>'
@@ -1334,7 +1467,21 @@ function wire(){
       });
       save(); render(); return;
     }
-    var fb = ev.target.closest(".filtros button");
+    var tb = ev.target.closest("[data-todas]");
+    if(tb){
+      var abrir = tb.getAttribute("data-todas")==="1";
+      todasLasSecciones().forEach(function(k){ setAbierto(k, abrir); });
+      render(); return;
+    }
+    var drop = ev.target.closest("[data-drop]");
+    if(drop){
+      /* setDecision hace el trabajo y de paso deja el aviso de lo quitado */
+      drop.getAttribute("data-drop").split(",").forEach(function(x){
+        if(dec(x)==="si") setDecision(x, "si");   /* toggle: lo suelta */
+      });
+      return;
+    }
+    var fb = ev.target.closest(".filtros button[data-f]");
     if(fb){
       state.filtro = fb.getAttribute("data-f");
       render();
@@ -1370,6 +1517,26 @@ function wire(){
   app.addEventListener("blur", function(ev){
     if(ev.target.id==="precio"){ render(); }
   }, true);
+
+  /* el evento toggle de <details> NO burbujea: sin capture no llega */
+  app.addEventListener("toggle", function(ev){
+    var d = ev.target;
+    if(d && d.tagName==="DETAILS" && d.hasAttribute("data-sec")){
+      setAbierto(d.getAttribute("data-sec"), d.open);
+    }
+  }, true);
+
+  /* una seccion plegada no imprime su contenido */
+  window.addEventListener("beforeprint", function(){
+    document.querySelectorAll("details[data-sec]").forEach(function(d){
+      if(!d.open){ d.setAttribute("data-reabrir",""); d.open = true; }
+    });
+  });
+  window.addEventListener("afterprint", function(){
+    document.querySelectorAll("details[data-reabrir]").forEach(function(d){
+      d.removeAttribute("data-reabrir"); d.open = false;
+    });
+  });
 
   app.addEventListener("change", function(ev){
     if(ev.target.id==="sel-tipo"){ state.tipo = parseInt(ev.target.value,10); save(); render(); }
