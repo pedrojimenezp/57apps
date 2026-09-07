@@ -279,6 +279,72 @@ summary.sec-head:focus-visible{outline:2px solid var(--brand); outline-offset:-2
 }
 .sec-sub{color:var(--ink-2); font-size:13.5px; margin:0 0 16px; max-width:64ch}
 
+/* ============ RECORRIDOS 3D ============ */
+.tours{
+  background:var(--surface); border:1px solid var(--line);
+  border-left:3px solid var(--brand); padding:20px 22px; margin:26px 0 0;
+}
+.tours h2{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif;
+  font-weight:700; font-size:21px; margin:0 0 8px; letter-spacing:-.01em; text-wrap:balance;
+}
+.tours-lead{margin:0 0 16px; font-size:14px; line-height:1.55; color:var(--ink-2); max-width:70ch}
+.tours-lead b{color:var(--ink); font-weight:600}
+.tcards{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+@media (max-width:620px){.tcards{grid-template-columns:1fr}}
+.tcard{background:var(--surface-2); border:1px solid var(--line); padding:14px 16px}
+.tcard-t{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif;
+  font-weight:600; font-size:16.5px; margin:0; color:var(--ink);
+}
+.tcard-a{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px;
+  color:var(--ink-3); margin:2px 0 7px; letter-spacing:.04em;
+}
+.tcard-d{margin:0 0 12px; font-size:13px; line-height:1.45; color:var(--ink-2)}
+.tcard-b{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+.tlink{color:var(--brand); font-size:12.5px; text-decoration:underline}
+.tours-sub{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:10px;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3);
+  margin:20px 0 0;
+}
+ul.mirar{margin:8px 0 0; padding:0; list-style:none}
+ul.mirar li{
+  display:flex; gap:14px; padding:7px 0; border-top:1px solid var(--line-2);
+  font-size:13px; flex-wrap:wrap;
+}
+ul.mirar li b{font-weight:600; flex:0 0 120px; color:var(--ink)}
+ul.mirar li span{flex:1 1 240px; color:var(--ink-2); font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11.5px; line-height:1.5}
+.tours-note{margin:16px 0 0; font-size:12.5px; line-height:1.5; color:var(--ink-3); max-width:74ch}
+.tours-print{display:none}
+
+/* visor */
+#tour{
+  border:none; padding:0; width:min(1200px,96vw); max-width:96vw;
+  max-height:94vh; background:var(--surface); color:var(--ink);
+  box-shadow:0 12px 60px rgba(0,0,0,.4);
+}
+#tour::backdrop{background:rgba(8,12,16,.82)}
+.tour-bar{
+  display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+  padding:11px 14px; border-bottom:1px solid var(--line); background:var(--surface-2);
+}
+.tour-h{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif;
+  font-weight:700; font-size:16px; margin:0; flex:0 0 auto;
+}
+.tour-sw button{padding:5px 11px; font-size:12px}
+.tour-sw button[aria-pressed="true"]{background:var(--brand-soft); color:var(--brand); font-weight:600}
+.tour-out{color:var(--brand); font-size:12.5px; text-decoration:underline; margin-left:auto}
+.tour-x{
+  background:var(--ink); color:var(--ground); border:1px solid var(--ink);
+  border-radius:2px; padding:6px 13px; font-size:12.5px; font-weight:600;
+}
+.tour-frame{position:relative; width:100%; aspect-ratio:16/10; background:#0b0f13}
+@media (max-width:700px){.tour-frame{aspect-ratio:3/4}}
+.tour-frame iframe{position:absolute; inset:0; width:100%; height:100%; border:0; display:block}
+
 .explain{
   background:var(--brand-soft); border-left:3px solid var(--brand);
   padding:16px 18px; margin:26px 0 0;
@@ -420,6 +486,9 @@ summary.sec-head:focus-visible{outline:2px solid var(--brand); outline-offset:-2
 
 @media print{
   .no-print{display:none!important}
+  #tour{display:none!important}
+  .tours-print{display:block; font-family:"IBM Plex Mono",monospace; font-size:10pt; margin-top:12px}
+  .tcard-b{display:none}
   .lock{position:static; background:none; padding:10px 16px; text-align:left; border-top:1px solid var(--line)}
   .lock-in{max-width:none; background:none; border:none; box-shadow:none; padding:0}
   .lock-t{font-size:15px; margin-bottom:4px}
@@ -455,6 +524,25 @@ summary.sec-head:focus-visible{outline:2px solid var(--brand); outline-offset:-2
 </div>
 
 <div class="wrap"><div id="app"></div></div>
+
+<!-- El visor vive FUERA de #app a proposito: render() reemplaza el
+     innerHTML de #app en cada clic, y un iframe ahi dentro se recargaria
+     perdiendo la posicion dentro del recorrido. -->
+<dialog id="tour" aria-labelledby="tour-h">
+  <div class="tour-bar">
+    <p class="tour-h" id="tour-h">Recorrido 3D</p>
+    <div class="seg tour-sw">
+      <button type="button" data-tour="def">Por defecto · 67,36</button>
+      <button type="button" data-tour="mej">Mejorado · 76,65</button>
+    </div>
+    <a class="tour-out" id="tour-out" href="#" target="_blank" rel="noopener">Abrir en Matterport</a>
+    <button type="button" class="tour-x" id="tour-x" aria-label="Cerrar el recorrido">Cerrar</button>
+  </div>
+  <div class="tour-frame">
+    <iframe id="tour-if" title="Recorrido 3D del apartamento" src=""
+            allow="xr-spatial-tracking" allowfullscreen></iframe>
+  </div>
+</dialog>
 
 <script>
 (function(){
@@ -826,6 +914,28 @@ var NO_UPGRADE = [
  ["Pintura, cielo raso, sanitarios, cabina de ducha y espejo","Sin alternativa en la lista de precios."],
  ["Calentador, zona de ropas y vestier","Solo se pueden quitar."],
  ["Ventanería y fachada","El balcón se entrega siempre enchapado para conservar el acabado de fachada."]
+];
+
+/* Recorridos Matterport. Verificado: ninguno manda X-Frame-Options ni
+   frame-ancestors, asi que el embebido funciona. Las areas salen del
+   titulo real de cada modelo ("Nature Bio 67,36" / "Nature Bio 76.65 M").
+   Son dos unidades distintas: se comparan ESPACIOS, no apartamentos. */
+var TOURS = {
+  def:{ m:"iqH19cR3bgj", area:"67,36 m²", t:"Acabados por defecto",
+        d:"Lo que ya viene incluido en el apartamento." },
+  mej:{ m:"JVgLKjNcyVU", area:"76,65 m²", t:"Acabados mejorados",
+        d:"Cómo quedan los espacios con las mejoras de la lista." }
+};
+function tourUrl(k){ return "https://my.matterport.com/show/?m=" + TOURS[k].m; }
+
+/* Que mirar en cada espacio, atado a los codigos de la lista: es lo que
+   convierte los dos recorridos en una comparacion y no en dos enlaces. */
+var MIRAR = [
+  ["Cocina", "3.01 mueble superior y lavaplatos · 3.02 mesones, salpicadero, grifería y frente de barra"],
+  ["Baño social", "7.01 enchapes, piso, lavamanos, grifería e incrustaciones"],
+  ["Baño principal", "7.02, el mismo paquete aplicado al principal"],
+  ["Habitaciones", "2.01 piso · 2.02 zócalo"],
+  ["Sala y comedor", "2.02 zócalo · 3.03 alacena"]
 ];
 
 var LS = "nature-bio-reformas-v1";
@@ -1262,6 +1372,37 @@ function render(){
     +  '<div class="filtros"><span class="lab">Ver</span><div class="seg">'+fBtns+'</div></div>'
     +  '</div>';
 
+  /* recorridos 3D */
+  var tcards = "";
+  ["def","mej"].forEach(function(k){
+    var T = TOURS[k];
+    tcards += '<div class="tcard">'
+      +  '<p class="tcard-t">'+T.t+'</p>'
+      +  '<p class="tcard-a">'+T.area+'</p>'
+      +  '<p class="tcard-d">'+T.d+'</p>'
+      +  '<div class="tcard-b">'
+      +    '<button type="button" class="btn primary no-print" data-tour="'+k+'">Ver aquí</button>'
+      +    '<a class="tlink" href="'+tourUrl(k)+'" target="_blank" rel="noopener">Abrir en Matterport</a>'
+      +  '</div></div>';
+  });
+  var mirar = "";
+  for(var mi=0; mi<MIRAR.length; mi++){
+    mirar += '<li><b>'+MIRAR[mi][0]+'</b><span>'+MIRAR[mi][1]+'</span></li>';
+  }
+  h += '<div class="tours">'
+    +  '<h2>Míralo en 3D: compara espacio por espacio</h2>'
+    +  '<p class="tours-lead">Hay dos recorridos. <b>Abre el mismo espacio en los dos y compáralo</b>: '
+    +    'la cocina contra la cocina, el baño contra el baño, el piso contra el piso. '
+    +    'Es la forma más rápida de saber si una mejora te gusta antes de pagarla.</p>'
+    +  '<div class="tcards">'+tcards+'</div>'
+    +  '<p class="tours-sub">Qué mirar en cada espacio</p>'
+    +  '<ul class="mirar">'+mirar+'</ul>'
+    +  '<p class="tours-note">Son dos apartamentos de tamaños distintos, así que el área y la distribución '
+    +    'no son comparables entre ellos — lo que se compara son los materiales y los acabados. '
+    +    'Las reformas de esta lista no cambian el tamaño de tu apartamento. El recorrido se carga desde Matterport.</p>'
+    +  '<p class="tours-print">Por defecto: '+tourUrl("def")+'<br>Mejorado: '+tourUrl("mej")+'</p>'
+    +  '</div>';
+
   /* como leer */
   h += '<div class="explain"><h2>Antes de empezar: hay dos cosas distintas aquí</h2>'
     +  '<p><b>Las mejoras</b> (grupos 2, 3, 5, 6 y 7) cambian un acabado por uno mejor. <b>Suman</b> al precio del apartamento.</p>'
@@ -1381,7 +1522,10 @@ function exportTxt(){
   var L = [DISCLAIM, "",
            "SELECCION DE REFORMAS - PROYECTO NATURE BIO, TORRE 4",
            "Apartamento tipo " + state.tipo + ", piso " + state.piso,
-           "Lista aplicada: " + sheet, ""];
+           "Lista aplicada: " + sheet, "",
+           "RECORRIDOS 3D (compara espacio por espacio, son unidades distintas)",
+           "  Acabados por defecto (67,36 m2): " + tourUrl("def"),
+           "  Acabados mejorados  (76,65 m2): " + tourUrl("mej"), ""];
   var buckets = [
     ["si",    false, "MEJORAS QUE QUIERO"],
     ["quiza", false, "MEJORAS EN DUDA"],
@@ -1440,6 +1584,48 @@ function exportTxt(){
   setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
 }
 
+/* El visor. Vive fuera de #app, asi que se controla aparte y render()
+   no lo toca nunca. */
+var tourActual = null;
+function abrirTour(k){
+  var dlg = document.getElementById("tour");
+  if(!dlg || !TOURS[k]) return;
+  tourActual = k;
+  var T = TOURS[k];
+  document.getElementById("tour-h").textContent = T.t + " · " + T.area;
+  document.getElementById("tour-if").src = tourUrl(k);
+  document.getElementById("tour-out").href = tourUrl(k);
+  var sw = dlg.querySelectorAll(".tour-sw button");
+  for(var i=0;i<sw.length;i++){
+    sw[i].setAttribute("aria-pressed", sw[i].getAttribute("data-tour")===k);
+  }
+  if(typeof dlg.showModal === "function"){ if(!dlg.open) dlg.showModal(); }
+  else dlg.setAttribute("open","");
+}
+function cerrarTour(){
+  var dlg = document.getElementById("tour");
+  if(!dlg) return;
+  /* vaciar el src o el recorrido sigue corriendo detras con su WebGL */
+  document.getElementById("tour-if").src = "";
+  tourActual = null;
+  if(typeof dlg.close === "function" && dlg.open) dlg.close();
+  else dlg.removeAttribute("open");
+}
+function wireTour(){
+  var dlg = document.getElementById("tour");
+  if(!dlg) return;
+  dlg.addEventListener("click", function(ev){
+    var sw = ev.target.closest("[data-tour]");
+    if(sw){ abrirTour(sw.getAttribute("data-tour")); return; }
+    if(ev.target.closest("#tour-x")) cerrarTour();
+  });
+  /* Esc dispara close: hay que vaciar el src igual */
+  dlg.addEventListener("close", function(){
+    document.getElementById("tour-if").src = "";
+    tourActual = null;
+  });
+}
+
 /* Delegado UNA sola vez sobre #app, que es estable entre renders.
    render() solo reemplaza innerHTML: volver a registrar aqui apilaria
    listeners y cada click alternaria el mismo item dos veces. */
@@ -1467,6 +1653,8 @@ function wire(){
       });
       save(); render(); return;
     }
+    var tt = ev.target.closest("[data-tour]");
+    if(tt){ abrirTour(tt.getAttribute("data-tour")); return; }
     var tb = ev.target.closest("[data-todas]");
     if(tb){
       var abrir = tb.getAttribute("data-todas")==="1";
@@ -1556,6 +1744,7 @@ try{
 load();
 render();
 wire();
+wireTour();
 })();
 </script>
 </body>
