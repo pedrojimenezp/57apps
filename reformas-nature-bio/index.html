@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Reformas Nature Bio — Torre 4</title>
 <meta name="description" content="Herramienta no oficial para entender las opciones de reforma del proyecto Nature Bio, Torre 4: qué trae por defecto tu apartamento, qué cambia con cada mejora y cuánto suma o resta tu selección.">
-<meta name="robots" content="index,follow">
+<meta name="robots" content="noindex,nofollow">
 <meta name="color-scheme" content="light dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -105,6 +105,15 @@ h1{
   letter-spacing:-.015em; margin:0 0 14px; text-wrap:balance;
 }
 .lede{max-width:64ch; color:var(--ink-2); font-size:14.5px; margin:0}
+.official{margin:14px 0 0}
+.official a{
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:13.5px; font-weight:600; color:var(--brand);
+  text-decoration:underline; text-underline-offset:3px;
+  padding:6px 0; min-height:32px;
+}
+.official a:hover{color:var(--brand-2)}
 
 /* ============ SELECTOR ============ */
 .picker{
@@ -1059,6 +1068,10 @@ var TOURS = {
 };
 function tourUrl(k){ return "https://my.matterport.com/show/?m=" + TOURS[k].m; }
 
+/* Pagina oficial del proyecto. Es la unica fuente real: esta pagina no
+   es oficial y todo lo de aqui se confirma alli o con el asesor. */
+var OFICIAL = "https://www.constructoracapital.com/proyecto/1/medellin-y-alrededores/sabaneta/197/nature-bio";
+
 /* Que mirar en cada espacio, atado a los codigos de la lista: es lo que
    convierte los dos recorridos en una comparacion y no en dos enlaces. */
 var MIRAR = [
@@ -1432,6 +1445,7 @@ function render(){
     +  '<p class="eyebrow">Proyecto Nature Bio · Torre 4 · Sabaneta</p>'
     +  '<h1>Qué puedes cambiarle a tu apartamento</h1>'
     +  '<p class="lede">Cada fila es una decisión independiente: a la izquierda lo que trae el apartamento, a la derecha lo que pasa si tomas la opción. Elige tu tipología y tu piso, marca lo que te interesa y llévale la lista a tu asesor.</p>'
+    +  '<p class="official"><a href="'+OFICIAL+'" target="_blank" rel="noopener">Página oficial del proyecto · Constructora Capital <span aria-hidden="true">↗</span></a></p>'
     +  '</header>';
 
   /* selector */
@@ -1634,6 +1648,7 @@ function render(){
        '<span class="sum-n">'+NO_UPGRADE.length+' cosas fijas</span>');
 
   h += '<p class="foot">Herramienta no oficial, sin relación con la constructora. Construida sobre la lista de precios de reformas de 2023, Torre 4.<br>'
+    +  'Página oficial del proyecto: <a href="'+OFICIAL+'" target="_blank" rel="noopener">constructoracapital.com</a><br>'
     +  'Vista actual: '+esc(sheet)+' · '+t.pend+' ítems sin decidir.<br>'
     +  '<a href="/">57apps</a></p>';
 
