@@ -509,6 +509,28 @@ ul.mirar li .mirar-b{flex:0 0 auto; align-self:center}
 }
 .mirar-b:hover{background:var(--brand); color:var(--on-brand); border-color:var(--brand)}
 
+/* Boton flotante: el acceso al visor que acompana al scroll. z-index por
+   debajo del 30 de .tally; el dialogo va en el top layer y siempre gana. */
+.fab{
+  position:fixed; z-index:25;
+  right:20px; bottom:calc(20px + env(safe-area-inset-bottom, 0px));
+  display:inline-flex; align-items:center; gap:8px;
+  min-height:48px; padding:12px 20px; border-radius:26px;
+  background:var(--brand); color:var(--on-brand); border:1px solid var(--brand);
+  font-size:14.5px; font-weight:600; line-height:1.2;
+  box-shadow:0 4px 18px rgba(8,12,16,.28);
+  transition:opacity .16s, transform .16s;
+}
+.fab:hover{background:var(--brand-2); border-color:var(--brand-2)}
+/* [hidden] ya lo saca del flujo; esto es solo la entrada suave cuando
+   pasa de oculto a visible. */
+.fab[data-in="0"]{opacity:0; transform:translateY(10px); pointer-events:none}
+.fab .ico{font-size:16px; line-height:1}
+@media (max-width:700px){
+  .fab{right:12px; bottom:calc(12px + env(safe-area-inset-bottom, 0px));
+       min-height:44px; padding:10px 16px; font-size:13.5px}
+}
+
 .tboth{
   display:flex; align-items:center; gap:14px; flex-wrap:wrap;
   margin-top:12px; padding-top:12px; border-top:1px solid var(--line-2);
@@ -730,6 +752,13 @@ ul.mirar li .mirar-b{flex:0 0 auto; align-self:center}
 </div>
 
 <div class="wrap"><div id="app"></div></div>
+
+<!-- El flotante tambien vive fuera de #app: render() reemplaza el
+     innerHTML entero en cada clic de decision y se lo llevaria por
+     delante en mitad de su transicion. -->
+<button type="button" id="fab" class="fab no-print" hidden data-in="0">
+  <span class="ico" aria-hidden="true">&#129482;</span><span id="fab-t">Ver en 3D</span>
+</button>
 
 <!-- El visor vive FUERA de #app a proposito: render() reemplaza el
      innerHTML de #app en cada clic, y un iframe ahi dentro se recargaria
@@ -1569,7 +1598,12 @@ function visible(it){
 function itemHTML(it){
   var d = dec(it.c), blk = blockedBy(it), miss = missingNeeds(it);
   var cls = "item" + (it.neg?" neg":"") + (blk.length?" blocked":"");
-  var h = '<article class="'+cls+'" data-d="'+d+'" id="it-'+it.c+'">';
+  /* data-esp en el articulo, no solo en su boton: es lo que lee el
+     observador del flotante para saber que espacio estas mirando. */
+  var espArt = espDeItem(it.c);
+  var h = '<article class="'+cls+'" data-d="'+d+'"'
+        + (espArt ? ' data-esp="'+espArt+'"' : '')
+        + ' id="it-'+it.c+'">';
 
   var rv = revOf(it.c), kind = it.neg ? "neg" : "up";
   h += '<div class="item-top"><div class="code">'+it.c+'</div>'
@@ -1882,6 +1916,7 @@ function render(){
     +  '<a href="/">57apps</a></p>';
 
   document.getElementById("app").innerHTML = h;
+  observarFab();
 }
 
 /* --------------------- interacciones ---------------------- */
@@ -2081,6 +2116,7 @@ function abrirTour(espKey){
 
   if(typeof dlg.showModal === "function"){ if(!dlg.open) dlg.showModal(); }
   else dlg.setAttribute("open","");
+  pintarFab();   /* el ::backdrop es semitransparente: el flotante se traspasaria */
 }
 
 /* Una vez cargados los recorridos el boton general deja de invitar a
@@ -2089,6 +2125,94 @@ function abrirTour(espKey){
 function marcarVuelta(){
   var b = document.getElementById("tboth");
   if(b && cargado.def) b.textContent = "Volver al recorrido";
+}
+
+/* ------------------------ boton flotante ------------------------
+   El acceso al visor que acompana al scroll: la lista es larga y los
+   accesos generales viven arriba del todo.
+
+   Dos observadores. Uno decide SI se ve: mientras la seccion de
+   recorridos este en pantalla sobra, porque su propio boton hace el
+   trabajo. El otro decide QUE dice: mira que item cruza la franja
+   central y contextualiza la etiqueta.
+
+   Los dos apuntan a nodos de dentro de #app, asi que render() los deja
+   huerfanos y hay que rehacerlos. De ahi el disconnect() al empezar: sin
+   el se acumularia un par por cada clic de decision. */
+var obsTours = null, obsItems = null;
+var fabPasado = false;    /* ya pasamos la seccion de recorridos */
+var fabEsp = null;        /* espacio del item que tienes delante */
+var fabVistos = [];       /* items dentro de la franja, en orden de entrada */
+
+function fabEl(){ return document.getElementById("fab"); }
+
+function pintarFab(){
+  var b = fabEl();
+  if(!b) return;
+  var dlg = document.getElementById("tour");
+  var ver = fabPasado && !(dlg && dlg.open);
+  b.hidden = !ver;
+  b.setAttribute("data-in", ver ? "1" : "0");
+
+  var E = fabEsp ? espacioBy(fabEsp) : null;
+  document.getElementById("fab-t").textContent = E
+    ? "Ver " + E.t.toLowerCase() + " en 3D"
+    : (cargado.def ? "Volver al 3D" : "Ver en 3D");
+}
+
+function observarFab(){
+  if(typeof IntersectionObserver !== "function") return;
+  if(obsTours) obsTours.disconnect();
+  if(obsItems) obsItems.disconnect();
+  /* fabVistos si se limpia (apunta a nodos que render() acaba de tirar),
+     pero fabEsp NO: el observador nuevo dispara su primer callback en el
+     siguiente tick, y vaciarlo aqui haria parpadear la etiqueta a
+     generica en cada clic de decision. Si el item ya no existe, ese
+     primer callback lo corrige solo. */
+  fabVistos = [];
+
+  var tours = document.querySelector(".tours");
+  if(tours){
+    obsTours = new IntersectionObserver(function(es){
+      for(var i=0;i<es.length;i++){
+        /* solo cuenta haberla dejado ARRIBA: si sales por abajo (que no
+           pasa scrolleando, pero si con un salto de ancla) no queremos
+           encender el boton estando por encima de ella. */
+        fabPasado = !es[i].isIntersecting && es[i].boundingClientRect.top < 0;
+      }
+      pintarFab();
+    });
+    obsTours.observe(tours);
+  }
+
+  var items = document.querySelectorAll("#app .item[data-esp]");
+  if(items.length){
+    /* La franja es el 10% central de la pantalla: sin acotarla, con la
+       lista entera "visible" a la vez la etiqueta saltaria sin sentido. */
+    obsItems = new IntersectionObserver(function(es){
+      for(var i=0;i<es.length;i++){
+        var k = es[i].target.getAttribute("data-esp");
+        var at = fabVistos.indexOf(k);
+        if(es[i].isIntersecting){ if(at < 0) fabVistos.push(k); }
+        else if(at >= 0){ fabVistos.splice(at, 1); }
+      }
+      /* el ultimo en entrar manda */
+      fabEsp = fabVistos.length ? fabVistos[fabVistos.length-1] : null;
+      pintarFab();
+    }, { rootMargin: "-45% 0px -45% 0px", threshold: 0 });
+    for(var i=0;i<items.length;i++) obsItems.observe(items[i]);
+  }
+  pintarFab();
+}
+
+function wireFab(){
+  var b = fabEl();
+  if(!b) return;
+  b.addEventListener("click", function(){
+    /* Sin espacio a la vista se abre "suelto", que respeta donde
+       estabas; con espacio se va a ese espacio. */
+    if(fabEsp) abrirTour(fabEsp); else abrirTour();
+  });
 }
 
 /* Cerrar NO descarga nada: esa es toda la gracia. */
@@ -2115,6 +2239,9 @@ function wireTour(){
     }
     if(ev.target.closest("#tour-x")) cerrarTour();
   });
+
+  /* Cerrar tambien llega por Escape, que no pasa por #tour-x */
+  dlg.addEventListener("close", function(){ pintarFab(); });
 
   /* El aviso de "cargando" se quita cuando el iframe termina. Va con
      capture porque load no burbujea. */
@@ -2260,6 +2387,7 @@ function boot(){
   render();
   wire();
   wireTour();
+  wireFab();
 }
 
 /* ------------------------- la puerta ---------------------------- */
