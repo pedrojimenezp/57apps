@@ -393,6 +393,41 @@ ul.mirar li span{flex:1 1 240px; color:var(--ink-2); font-family:"IBM Plex Mono"
 .tours-note{margin:16px 0 0; font-size:13.5px; line-height:1.5; color:var(--ink-3); max-width:74ch}
 .tours-print{display:none}
 
+/* puerta de acceso */
+#gate{
+  border:none; padding:0; width:min(400px,92vw);
+  background:var(--surface); color:var(--ink);
+  box-shadow:0 12px 60px rgba(0,0,0,.4);
+}
+#gate::backdrop{background:rgba(8,12,16,.92)}
+#gate form{padding:24px 22px 22px}
+#gate h2{
+  font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif;
+  font-weight:700; font-size:21px; line-height:1.2; margin:0 0 8px;
+}
+.gate-p{margin:0 0 18px; font-size:13.5px; line-height:1.5; color:var(--ink-2)}
+#gate label{display:block; margin:0 0 12px}
+#gate .lab{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12px;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--ink-2);
+  display:block;
+}
+#gate input[type=text], #gate input[type=password]{
+  display:block; width:100%; box-sizing:border-box; margin-top:5px;
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:15px;
+  background:var(--surface-2); color:var(--ink);
+  border:1px solid var(--line); border-radius:2px; padding:9px 10px;
+}
+.gate-rec{
+  display:flex!important; align-items:center; gap:7px;
+  font-size:13px; color:var(--ink-2); margin:0 0 16px!important;
+}
+.gate-rec input{flex:none; margin:0}
+.gate-err{
+  margin:0 0 14px; font-size:13px; font-weight:600; color:var(--minus);
+}
+#gate .btn{width:100%; justify-content:center}
+
 /* visor */
 #tour{
   border:none; padding:0; width:min(1600px,98vw); max-width:98vw;
@@ -610,6 +645,7 @@ ul.mirar li span{flex:1 1 240px; color:var(--ink-2); font-family:"IBM Plex Mono"
 @media print{
   .no-print{display:none!important}
   #tour{display:none!important}
+  #gate{display:none!important}
   .tours-print{display:block; font-family:"IBM Plex Mono",monospace; font-size:10pt; margin-top:12px}
   .tcard-b{display:none}
   .lock{position:static; background:none; padding:10px 16px; text-align:left; border-top:1px solid var(--line)}
@@ -634,7 +670,23 @@ ul.mirar li span{flex:1 1 240px; color:var(--ink-2); font-family:"IBM Plex Mono"
 </head>
 <body>
 
-<div class="alert" role="alert">
+<!-- La puerta vive FUERA de #app, igual que el visor: render() reescribe
+     #app entero y se llevaria el dialogo por delante. -->
+<dialog id="gate" class="no-print" aria-labelledby="gate-h">
+  <form id="gate-f" method="dialog">
+    <h2 id="gate-h">Página privada</h2>
+    <p class="gate-p">Contenido de uso personal. Si no tienes las credenciales, esta página no es para ti.</p>
+    <label><span class="lab">Usuario</span>
+      <input id="gate-u" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required></label>
+    <label><span class="lab">Contraseña</span>
+      <input id="gate-w" type="password" autocomplete="current-password" required></label>
+    <label class="gate-rec"><input id="gate-rec" type="checkbox" checked> Recordar en este dispositivo</label>
+    <p class="gate-err" id="gate-err" hidden>Usuario o contraseña incorrectos.</p>
+    <button type="submit" class="btn primary">Entrar</button>
+  </form>
+</dialog>
+
+<div class="alert" role="alert" hidden>
   <div class="alert-in">
     <span class="alert-mk" aria-hidden="true">!</span>
     <div>
@@ -1968,10 +2020,78 @@ try{
   if(th) document.documentElement.setAttribute("data-theme", th);
 }catch(e){}
 
-load();
-render();
-wire();
-wireTour();
+/* Arranque, detras de la puerta. wire() y wireTour() registran listeners
+   delegados una sola vez, asi que boot() no puede correr dos veces. */
+var arrancado = false;
+function boot(){
+  if(arrancado) return;
+  arrancado = true;
+  var av = document.querySelector(".alert");
+  if(av) av.hidden = false;
+  load();
+  render();
+  wire();
+  wireTour();
+}
+
+/* ------------------------- la puerta ---------------------------- */
+/* Esto es un disuasivo, no una proteccion: el contenido viaja completo
+   en el HTML y aqui solo se decide si se pinta. Frena a quien llegue de
+   casualidad, no a quien mire el codigo fuente. Se guarda el SHA-256 y
+   no la clave en claro solo para no dejarla escrita en un repo publico. */
+var AUTH = "ae7885d347a2aaff69ee8bc6f697411efbe1c1af4119c600d32956df4d333f86";
+var AUTH_LS = LS + "-auth";
+
+function hash(txt){
+  return crypto.subtle.digest("SHA-256", new TextEncoder().encode(txt)).then(function(buf){
+    var b = new Uint8Array(buf), h = "";
+    for(var i=0;i<b.length;i++) h += b[i].toString(16).padStart(2,"0");
+    return h;
+  });
+}
+
+function abrirPuerta(){
+  var dlg = document.getElementById("gate");
+  if(typeof dlg.showModal === "function"){ if(!dlg.open) dlg.showModal(); }
+  else dlg.setAttribute("open","");
+
+  /* A diferencia del visor, aqui Escape NO puede cerrar: sin esto la
+     puerta se esquiva con una tecla. */
+  dlg.addEventListener("cancel", function(e){ e.preventDefault(); });
+
+  document.getElementById("gate-f").addEventListener("submit", function(e){
+    e.preventDefault();
+    var u = document.getElementById("gate-u").value.trim();
+    var w = document.getElementById("gate-w").value;
+    hash(u + "\n" + w).then(function(h){
+      if(h !== AUTH){
+        document.getElementById("gate-err").hidden = false;
+        document.getElementById("gate-w").value = "";
+        document.getElementById("gate-w").focus();
+        return;
+      }
+      if(document.getElementById("gate-rec").checked){
+        try{ localStorage.setItem(AUTH_LS, h); }catch(err){}
+      }
+      if(dlg.close) dlg.close(); else dlg.removeAttribute("open");
+      boot();
+    });
+  });
+
+  var u0 = document.getElementById("gate-u");
+  if(u0) u0.focus();
+}
+
+/* crypto.subtle solo existe en contexto seguro; por http no habria forma
+   de entrar. */
+if(location.protocol === "http:" && location.hostname !== "localhost"){
+  location.replace(location.href.replace(/^http:/, "https:"));
+}else{
+  var recordado = null;
+  try{ recordado = localStorage.getItem(AUTH_LS); }catch(e){}
+  if(recordado === AUTH) boot();
+  else abrirPuerta();
+}
 })();
 </script>
 </body>
