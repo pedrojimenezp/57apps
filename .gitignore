@@ -1,1 +1,5 @@
 .DS_Store
+
+# La lista de precios de la constructora llego por correo con aviso legal:
+# se queda en local, nunca se publica en el sitio.
+*.xlsx
