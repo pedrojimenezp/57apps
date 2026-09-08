@@ -390,6 +390,7 @@ ul.mirar li{
 }
 ul.mirar li b{font-weight:600; flex:0 0 120px; color:var(--ink)}
 ul.mirar li span{flex:1 1 240px; color:var(--ink-2); font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:13.5px; line-height:1.5}
+ul.mirar li .mirar-b{flex:0 0 auto; align-self:center}
 .tours-note{margin:16px 0 0; font-size:13.5px; line-height:1.5; color:var(--ink-3); max-width:74ch}
 .tours-print{display:none}
 
@@ -444,40 +445,69 @@ ul.mirar li span{flex:1 1 240px; color:var(--ink-2); font-family:"IBM Plex Mono"
   font-weight:700; font-size:16px; margin:0; flex:0 0 auto;
 }
 
-/* hereda el .seg button[aria-pressed] comun */
-.tour-out{color:var(--brand); font-size:13.5px; text-decoration:underline; margin-left:auto}
+/* chips de espacio: heredan el .seg button[aria-pressed] comun */
+.tour-esp{flex-wrap:wrap}
+.tour-esp button{padding:8px 13px; min-height:38px; font-size:13.5px}
+.tour-esp-lab{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); flex:0 0 auto;
+}
+.tour-reset{font-size:13px; padding:7px 12px; min-height:38px; margin-left:auto}
 .tour-x{
   background:var(--ink); color:var(--ground); border:1px solid var(--ink);
   border-radius:2px; padding:6px 13px; font-size:13.5px; font-weight:600;
 }
-/* el JS lo muestra solo en modo both; aqui se limita ademas a pantalla
-   angosta, que es donde el aviso significa algo */
+/* Los dos recorridos estan siempre abiertos, asi que el aviso solo
+   tiene sentido donde los paneles se apilan y dejan de compararse. */
 .tour-warn{display:none}
 @media (max-width:820px){
-  .tour-warn:not([hidden]){
+  .tour-warn{
     display:block; margin:0; padding:8px 14px;
     background:var(--alert); color:var(--alert-ink);
     font-size:13.5px; font-weight:600; border-bottom:1px solid var(--alert-edge);
   }
 }
-.tour-panes{display:grid; grid-template-columns:1fr; gap:1px; background:var(--line)}
-.tour-panes[data-modo="both"]{grid-template-columns:1fr 1fr}
-@media (max-width:820px){.tour-panes[data-modo="both"]{grid-template-columns:1fr}}
+/* Siempre dos columnas: ya no hay vistas individuales, el visor ES la
+   comparacion. Bajo 820px se apilan. */
+.tour-panes{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line)}
+@media (max-width:820px){.tour-panes{grid-template-columns:1fr}}
 .tour-pane{display:flex; flex-direction:column; min-width:0; background:var(--surface)}
 .pane-h{
-  display:none; margin:0; padding:7px 12px;
+  display:flex; gap:10px; align-items:baseline; flex-wrap:wrap;
+  margin:0; padding:7px 12px;
   font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:13.5px;
   letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2);
   background:var(--surface-2); border-bottom:1px solid var(--line);
 }
-/* solo hace falta rotular cuando hay dos a la vez */
-.tour-panes[data-modo="both"] .pane-h{display:block}
-.tour-frame{position:relative; width:100%; height:min(74vh,720px); background:#0b0f13}
-.tour-panes[data-modo="both"] .tour-frame{height:min(70vh,700px)}
-@media (max-width:820px){
-  .tour-panes[data-modo="both"] .tour-frame{height:44vh}
+.pane-out{
+  margin-left:auto; color:var(--brand); text-decoration:underline;
+  letter-spacing:.04em; text-transform:none; font-size:12.5px;
 }
+.tour-frame{position:relative; width:100%; height:min(70vh,700px); background:#0b0f13}
+@media (max-width:820px){.tour-frame{height:44vh}}
 .tour-frame iframe{position:absolute; inset:0; width:100%; height:100%; border:0; display:block}
+/* Matterport tarda varios segundos: sin este aviso, saltar de espacio
+   parece que no hizo nada. El evento load del iframe lo quita. */
+.tour-frame[data-load="1"]::after{
+  content:"Cargando el recorrido\2026"; position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  background:#0b0f13; color:#8d9299; z-index:1;
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:13px;
+  letter-spacing:.08em; text-transform:uppercase;
+}
+
+/* boton "ver en 3D" dentro de cada item */
+.b3d{
+  font-size:13px; padding:8px 13px; min-height:38px;
+  border-color:var(--brand); color:var(--brand); background:var(--brand-soft);
+}
+.b3d:hover{background:var(--brand); color:var(--on-brand); border-color:var(--brand)}
+/* boton de salto en la lista "que mirar en cada espacio" */
+.mirar-b{
+  font-size:12.5px; padding:6px 11px; min-height:34px;
+  border-color:var(--brand); color:var(--brand); background:transparent;
+}
+.mirar-b:hover{background:var(--brand); color:var(--on-brand); border-color:var(--brand)}
 
 .tboth{
   display:flex; align-items:center; gap:14px; flex-wrap:wrap;
@@ -703,32 +733,35 @@ ul.mirar li span{flex:1 1 240px; color:var(--ink-2); font-family:"IBM Plex Mono"
 
 <!-- El visor vive FUERA de #app a proposito: render() reemplaza el
      innerHTML de #app en cada clic, y un iframe ahi dentro se recargaria
-     perdiendo la posicion dentro del recorrido. -->
+     perdiendo la posicion dentro del recorrido.
+
+     Los dos iframes son FIJOS y no se descargan nunca mientras viva la
+     pestana: cerrar el dialogo solo lo oculta. Un iframe en display:none
+     deja de recibir requestAnimationFrame, asi que la escena WebGL se
+     congela sola y no hace falta vaciar el src (que era justo lo que
+     borraba tu posicion dentro del recorrido). -->
 <dialog id="tour" aria-labelledby="tour-h">
   <div class="tour-bar">
-    <p class="tour-h" id="tour-h">Recorrido 3D</p>
-    <div class="seg tour-sw">
-      <button type="button" data-tour="def">Por defecto · 67,36</button>
-      <button type="button" data-tour="mej">Mejorado · 76,65</button>
-      <button type="button" data-tour="both">Lado a lado</button>
-    </div>
-    <a class="tour-out" id="tour-out" href="#" target="_blank" rel="noopener">Abrir en Matterport</a>
+    <p class="tour-h" id="tour-h">Recorrido 3D · lado a lado</p>
+    <span class="tour-esp-lab" id="tour-esp-lab" hidden>Espacio</span>
+    <div class="seg tour-esp" id="tour-esp" role="group" aria-label="Saltar a un espacio"></div>
+    <button type="button" class="btn tour-reset" id="tour-reset">Reiniciar</button>
     <button type="button" class="tour-x" id="tour-x" aria-label="Cerrar el recorrido">Cerrar</button>
   </div>
-  <p class="tour-warn" id="tour-warn" hidden>Estás cargando dos recorridos a la vez. En pantalla grande se compara mucho mejor.</p>
-  <!-- Un iframe FIJO por recorrido: asi pasar de un modo a otro no
-       recarga el que ya estabas navegando. -->
+  <p class="tour-warn">En esta pantalla los dos recorridos quedan uno debajo del otro. En pantalla grande se comparan mucho mejor.</p>
   <div class="tour-panes" id="tour-panes">
     <div class="tour-pane" id="pane-def">
-      <p class="pane-h">Por defecto · 67,36 m²</p>
-      <div class="tour-frame">
+      <p class="pane-h">Por defecto · 67,36 m²
+        <a class="pane-out" id="pane-out-def" href="#" target="_blank" rel="noopener">Abrir en Matterport ↗</a></p>
+      <div class="tour-frame" data-load="1">
         <iframe id="tour-if-def" title="Recorrido 3D — acabados por defecto, 67,36 m²" src=""
                 allow="xr-spatial-tracking" allowfullscreen></iframe>
       </div>
     </div>
     <div class="tour-pane" id="pane-mej">
-      <p class="pane-h">Mejorado · 76,65 m²</p>
-      <div class="tour-frame">
+      <p class="pane-h">Mejorado · 76,65 m²
+        <a class="pane-out" id="pane-out-mej" href="#" target="_blank" rel="noopener">Abrir en Matterport ↗</a></p>
+      <div class="tour-frame" data-load="1">
         <iframe id="tour-if-mej" title="Recorrido 3D — acabados mejorados, 76,65 m²" src=""
                 allow="xr-spatial-tracking" allowfullscreen></iframe>
       </div>
@@ -1118,21 +1151,144 @@ var TOURS = {
   mej:{ m:"JVgLKjNcyVU", area:"76,65 m²", t:"Acabados mejorados",
         d:"Cómo quedan los espacios con las mejoras de la lista." }
 };
-function tourUrl(k){ return "https://my.matterport.com/show/?m=" + TOURS[k].m; }
+/* Sin ancla, la URL desnuda del modelo. Con ancla, la misma URL mas el
+   punto y el angulo (&play=1 evita el clic extra de arranque dentro del
+   iframe, que en un lado a lado hay que dar dos veces). */
+function tourUrl(k, espKey){
+  var u = "https://my.matterport.com/show/?m=" + TOURS[k].m;
+  var a = espKey ? ancla(espKey, k) : null;
+  if(!a) return u;
+  return u + "&ss=" + a.ss + (a.sr ? "&sr=" + a.sr : "") + "&play=1";
+}
 
 /* Pagina oficial del proyecto. Es la unica fuente real: esta pagina no
    es oficial y todo lo de aqui se confirma alli o con el asesor. */
 var OFICIAL = "https://www.constructoracapital.com/proyecto/1/medellin-y-alrededores/sabaneta/197/nature-bio";
 
-/* Que mirar en cada espacio, atado a los codigos de la lista: es lo que
-   convierte los dos recorridos en una comparacion y no en dos enlaces. */
-var MIRAR = [
-  ["Cocina", "3.01 mueble superior y lavaplatos · 3.02 mesones, salpicadero, grifería y frente de barra"],
-  ["Baño social", "7.01 enchapes, piso, lavamanos, grifería e incrustaciones"],
-  ["Baño principal", "7.02, el mismo paquete aplicado al principal"],
-  ["Habitaciones", "2.01 piso · 2.02 zócalo"],
-  ["Sala y comedor", "2.02 zócalo · 3.03 alacena"]
+/* ==============================================================
+   ANCLAS DE LOS RECORRIDOS  --  RELLENAR A MANO
+
+   Como sacar cada enlace:
+     1. Abre el recorrido en Matterport.
+     2. Camina hasta el espacio y dejalo mirando hacia lo que importa.
+     3. Compartir -> marca "enlace a esta ubicacion" -> copia.
+     4. Pega el enlace COMPLETO, tal cual, entre las comillas.
+
+   Queda algo asi:
+     def:"https://my.matterport.com/show/?m=iqH19cR3bgj&ss=19&sr=-3.05,.57",
+
+     def = recorrido POR DEFECTO  (67,36 m2 - m=iqH19cR3bgj)
+     mej = recorrido MEJORADO     (76,65 m2 - m=JVgLKjNcyVU)
+
+   Ojo: cada enlace tiene que venir de SU recorrido. Si el m= no
+   coincide, el ancla se ignora y la consola lo avisa al cargar.
+
+   Un espacio sin los DOS enlaces no muestra boton ni chip. La pagina
+   funciona igual, simplemente sin salto directo a ese espacio.
+   ============================================================== */
+var ESPACIOS = [
+  { k:"cocina", t:"Cocina",
+    mirar:"3.01 mueble superior y lavaplatos · 3.02 mesones, salpicadero, grifería y frente de barra",
+    def:"",
+    mej:"" },
+
+  { k:"bsocial", t:"Baño social",
+    mirar:"7.01 enchapes, piso, lavamanos, grifería e incrustaciones",
+    def:"",
+    mej:"" },
+
+  { k:"bpral", t:"Baño principal",
+    mirar:"7.02, el mismo paquete aplicado al principal",
+    def:"",
+    mej:"" },
+
+  { k:"hab", t:"Habitaciones",
+    mirar:"2.01 piso · 2.02 zócalo",
+    def:"",
+    mej:"" },
+
+  { k:"social", t:"Sala y comedor",
+    mirar:"2.02 zócalo · 3.03 alacena",
+    def:"",
+    mej:"" }
 ];
+
+/* --- lectura de las anclas -------------------------------------
+   El enlace pegado NO se usa como src. Se le sacan ss y sr y se
+   reconstruye la URL sobre nuestro propio m=: si alguien pega el
+   enlace del modelo equivocado, con src directo veriamos el
+   recorrido que no es sin ningun aviso. Asi se descarta y se avisa. */
+var ANCLAS = {};   /* {espKey: {def:{ss,sr}, mej:{ss,sr}}} */
+
+function parseAncla(url, k, espKey){
+  if(!url) return null;
+  var m  = /[?&]m=([^&]+)/.exec(url);
+  var ss = /[?&]ss=(\d+)/.exec(url);
+  var sr = /[?&]sr=([-\d.,]+)/.exec(url);
+  if(!m || m[1] !== TOURS[k].m){
+    if(window.console) console.warn(
+      "Ancla ignorada en " + espKey + "." + k +
+      ": el enlace es de otro modelo (m=" + (m ? m[1] : "?") +
+      ", se esperaba m=" + TOURS[k].m + ").");
+    return null;
+  }
+  if(!ss){
+    if(window.console) console.warn(
+      "Ancla ignorada en " + espKey + "." + k +
+      ": el enlace no trae &ss=. Marca \"enlace a esta ubicacion\" al compartir.");
+    return null;
+  }
+  return { ss: ss[1], sr: sr ? sr[1] : "" };
+}
+
+function leerAnclas(){
+  var faltan = [];
+  for(var i=0;i<ESPACIOS.length;i++){
+    var E = ESPACIOS[i];
+    var a = { def: parseAncla(E.def, "def", E.k), mej: parseAncla(E.mej, "mej", E.k) };
+    if(a.def && a.mej) ANCLAS[E.k] = a; else faltan.push(E.k);
+  }
+  if(faltan.length && window.console){
+    console.info("Espacios sin recorrido enlazado (rellena ESPACIOS en index.html): " +
+                 faltan.join(", "));
+  }
+}
+/* Que item se mira en que espacio. Un item, un espacio: los que tocan
+   dos (2.02 zocalo, 8.12 y 8.13 piso de zona social) apuntan al
+   principal y los chips del visor cubren el otro.
+   Los grupos 5 y 6, la zona de ropas, el calentador y la obra gris no
+   estan aqui a proposito: no cambian nada que se vea en un render. */
+var ESP_ITEM = {
+  cocina : ["3.01","3.02","8.12","8.13","8.17","8.21"],
+  bsocial: ["7.01","8.05","8.15"],
+  bpral  : ["7.02","8.04","8.16"],
+  hab    : ["2.01","2.02","8.01","8.02","8.03","8.06","8.08","8.09","8.10","8.11","8.14"],
+  social : ["3.03"]
+};
+var ESP_DE = {};   /* codigo de item -> espacio */
+(function(){
+  for(var k in ESP_ITEM){
+    if(!ESP_ITEM.hasOwnProperty(k)) continue;
+    for(var i=0;i<ESP_ITEM[k].length;i++) ESP_DE[ESP_ITEM[k][i]] = k;
+  }
+})();
+/* Solo devuelve espacio si ademas hay enlaces: sin anclas no hay boton
+   que pintar. */
+function espDeItem(c){
+  var k = ESP_DE[c];
+  return (k && anclaOK(k)) ? k : null;
+}
+
+function anclaOK(espKey){ return !!ANCLAS[espKey]; }
+function ancla(espKey, k){ return ANCLAS[espKey] ? ANCLAS[espKey][k] : null; }
+function espacioBy(espKey){
+  for(var i=0;i<ESPACIOS.length;i++) if(ESPACIOS[i].k === espKey) return ESPACIOS[i];
+  return null;
+}
+function hayAnclas(){
+  for(var k in ANCLAS){ if(ANCLAS.hasOwnProperty(k)) return true; }
+  return false;
+}
 
 var LS = "nature-bio-reformas-v1";
 var DISCLAIM = "AVISO: precios de la lista 2023, herramienta NO OFICIAL, solo un estimado aproximado. El valor final lo define la constructora. Verifica todo con tu asesor comercial.";
@@ -1465,7 +1621,15 @@ function itemHTML(it){
   for(var k2=0;k2<opts.length;k2++){
     h += '<button type="button" data-c="'+it.c+'" data-v="'+opts[k2][0]+'" aria-pressed="'+(d===opts[k2][0])+'"'+off+'>'+opts[k2][1]+'</button>';
   }
-  h += '</div><input class="note" type="text" data-c="'+it.c+'" placeholder="Nota…" value="'+esc(state.n[it.c]||"")+'"'+off+'></div>';
+  h += '</div>';
+  /* El salto al 3D no depende de si la tarjeta esta bloqueada: ver como
+     queda un espacio sigue siendo util aunque no puedas marcarlo. */
+  var esp3d = espDeItem(it.c);
+  if(esp3d){
+    h += '<button type="button" class="btn b3d no-print" data-esp="'+esp3d+'">Ver '
+      +  esc(espacioBy(esp3d).t.toLowerCase())+' en 3D</button>';
+  }
+  h += '<input class="note" type="text" data-c="'+it.c+'" placeholder="Nota…" value="'+esc(state.n[it.c]||"")+'"'+off+'></div>';
 
   if(blk.length){
     var cods = '<b>'+blk.join('</b>, <b>')+'</b>', varios = blk.length>1, msg;
@@ -1590,23 +1754,36 @@ function render(){
       +  '<p class="tcard-a">'+T.area+'</p>'
       +  '<p class="tcard-d">'+T.d+'</p>'
       +  '<div class="tcard-b">'
-      +    '<button type="button" class="btn primary no-print" data-tour="'+k+'">Ver aquí</button>'
-      +    '<a class="tlink" href="'+tourUrl(k)+'" target="_blank" rel="noopener">Abrir en Matterport</a>'
+      +    '<a class="tlink" href="'+tourUrl(k)+'" target="_blank" rel="noopener">Abrir solo este en Matterport ↗</a>'
       +  '</div></div>';
   });
+  /* La misma tabla ESPACIOS alimenta la lista y los chips del visor: si
+     estuvieran duplicadas se desincronizarian a la primera. */
   var mirar = "";
-  for(var mi=0; mi<MIRAR.length; mi++){
-    mirar += '<li><b>'+MIRAR[mi][0]+'</b><span>'+MIRAR[mi][1]+'</span></li>';
+  for(var mi=0; mi<ESPACIOS.length; mi++){
+    var EM = ESPACIOS[mi];
+    mirar += '<li><b>'+esc(EM.t)+'</b><span>'+EM.mirar+'</span>'
+      +  (anclaOK(EM.k)
+          ? '<button type="button" class="btn mirar-b no-print" data-esp="'+EM.k+'">Ver en 3D</button>'
+          : '')
+      +  '</li>';
   }
   h += '<div class="tours">'
     +  '<h2>Míralo en 3D: compara espacio por espacio</h2>'
-    +  '<p class="tours-lead">Hay dos recorridos. <b>Abre el mismo espacio en los dos y compáralo</b>: '
+    +  '<p class="tours-lead">El visor abre los <b>dos recorridos a la vez, uno al lado del otro</b>: '
     +    'la cocina contra la cocina, el baño contra el baño, el piso contra el piso. '
-    +    'Es la forma más rápida de saber si una mejora te gusta antes de pagarla.</p>'
+    +    'Es la forma más rápida de saber si una mejora te gusta antes de pagarla. '
+    +    'Puedes cerrarlo, seguir marcando en la lista y volver: '
+    +    '<b>cada recorrido te espera donde lo dejaste</b>.</p>'
     +  '<div class="tcards">'+tcards+'</div>'
     +  '<div class="tboth no-print">'
-    +    '<button type="button" class="btn primary tboth-b" data-tour="both">Ver los dos lado a lado</button>'
-    +    '<span>Los dos abiertos a la vez, cada uno navegable por su cuenta. Es la forma más directa de comparar.</span>'
+    +    '<button type="button" class="btn primary tboth-b" id="tboth" data-tour="both">'
+    +      (cargado.def ? 'Volver al recorrido' : 'Ver los dos lado a lado')+'</button>'
+    +    '<span>'
+    +      (hayAnclas()
+        ? 'Cada uno se navega por su cuenta, y desde adentro puedes saltar de un espacio al otro en los dos a la vez.'
+        : 'Cada uno se navega por su cuenta. Es la forma más directa de comparar.')
+    +    '</span>'
     +  '</div>'
     +  '<p class="tours-sub">Qué mirar en cada espacio</p>'
     +  '<ul class="mirar">'+mirar+'</ul>'
@@ -1827,80 +2004,126 @@ function exportTxt(){
 }
 
 /* El visor. Vive fuera de #app, asi que se controla aparte y render()
-   no lo toca nunca. */
-var tourActual = null;   /* "def" | "mej" | "both" */
+   no lo toca nunca.
 
-/* Cada recorrido tiene su iframe fijo. Pasar de un modo a otro solo
-   rellena o vacia src: el que ya estaba cargado conserva su posicion.
-   Vaciar el src del que se oculta NO es opcional, o la escena sigue
-   corriendo con su WebGL detras del panel. */
-function pintarTour(modo){
-  var quiere = { def: modo==="def"||modo==="both", mej: modo==="mej"||modo==="both" };
+   Los dos recorridos estan SIEMPRE lado a lado: ya no hay vistas
+   individuales. Quien quiera uno solo lo abre en Matterport, para eso
+   esta el enlace de cada panel.
+
+   Y una vez cargado, un iframe NO se descarga nunca. Cerrar el dialogo
+   solo lo oculta; el navegador deja de darle requestAnimationFrame a un
+   iframe en display:none, asi que la escena se congela sola. Vaciar el
+   src era lo que borraba la posicion dentro del recorrido cada vez que
+   cerrabas. */
+var tourEsp = null;                /* espacio cargado ahora mismo, o null */
+var cargado = {def:"", mej:""};    /* la URL que de verdad tiene cada iframe */
+
+/* Solo toca el src si la URL cambia de verdad: volver al mismo espacio,
+   o reabrir el visor, no debe recargar nada. */
+function pintarTour(espKey){
   ["def","mej"].forEach(function(k){
-    var pane = document.getElementById("pane-"+k);
-    var ifr  = document.getElementById("tour-if-"+k);
-    if(!pane || !ifr) return;
-    if(quiere[k]){
-      pane.hidden = false;
-      if(ifr.getAttribute("src") !== tourUrl(k)) ifr.src = tourUrl(k);
-    }else{
-      pane.hidden = true;
-      if(ifr.getAttribute("src")) ifr.src = "";
-    }
+    var ifr = document.getElementById("tour-if-"+k);
+    if(!ifr) return;
+    var url = tourUrl(k, espKey);
+    if(cargado[k] === url) return;
+    var frame = ifr.parentNode;
+    if(frame) frame.setAttribute("data-load","1");
+    ifr.src = url;
+    cargado[k] = url;
+    var out = document.getElementById("pane-out-"+k);
+    if(out) out.href = url;
   });
 }
 
-function abrirTour(modo){
+/* Chips de espacio: solo los que tienen los dos enlaces puestos. */
+function pintarChips(){
+  var box = document.getElementById("tour-esp");
+  var lab = document.getElementById("tour-esp-lab");
+  if(!box) return;
+  var h = "";
+  for(var i=0;i<ESPACIOS.length;i++){
+    var E = ESPACIOS[i];
+    if(!anclaOK(E.k)) continue;
+    h += '<button type="button" data-esp="'+E.k+'" aria-pressed="'+(tourEsp===E.k)+'">'
+      +  esc(E.t)+'</button>';
+  }
+  box.innerHTML = h;
+  box.hidden = !h;
+  if(lab) lab.hidden = !h;
+}
+
+/* Sin argumento = "abre lo que ya haya cargado". Es lo que hace el boton
+   general de la seccion de recorridos: si vuelves despues de cerrar, lo
+   ultimo que querrias es que te devolviera a la entrada del apartamento.
+   Con argumento = ve a ese espacio, y ahi si recarga, que es justo lo que
+   estas pidiendo. */
+function abrirTour(espKey){
   var dlg = document.getElementById("tour");
   if(!dlg) return;
-  if(modo !== "both" && !TOURS[modo]) return;
-  tourActual = modo;
+  var suelto = (arguments.length === 0);
+  if(espKey && !anclaOK(espKey)) espKey = null;
 
-  document.getElementById("tour-h").textContent = modo==="both"
-    ? "Lado a lado"
-    : TOURS[modo].t + " · " + TOURS[modo].area;
-
-  var out = document.getElementById("tour-out");
-  out.href = tourUrl(modo==="both" ? "def" : modo);
-  out.textContent = modo==="both" ? "Abrir el de 67,36 en Matterport" : "Abrir en Matterport";
-
-  var warn = document.getElementById("tour-warn");
-  if(warn) warn.hidden = (modo !== "both");
-
-  var panes = document.getElementById("tour-panes");
-  if(panes) panes.setAttribute("data-modo", modo);
-
-  var sw = dlg.querySelectorAll(".tour-sw button");
-  for(var i=0;i<sw.length;i++){
-    sw[i].setAttribute("aria-pressed", sw[i].getAttribute("data-tour")===modo);
+  if(!cargado.def){
+    /* primera apertura: los iframes estan vacios y hay que cargar algo */
+    tourEsp = suelto ? null : espKey;
+    pintarTour(tourEsp);
+  }else if(!suelto && espKey !== tourEsp){
+    tourEsp = espKey;
+    pintarTour(tourEsp);
   }
 
-  pintarTour(modo);
+  var E = tourEsp ? espacioBy(tourEsp) : null;
+  document.getElementById("tour-h").textContent = E
+    ? "En 3D · " + E.t
+    : "Recorrido 3D · lado a lado";
+  pintarChips();
+  marcarVuelta();
+
   if(typeof dlg.showModal === "function"){ if(!dlg.open) dlg.showModal(); }
   else dlg.setAttribute("open","");
 }
 
+/* Una vez cargados los recorridos el boton general deja de invitar a
+   abrir y pasa a invitar a volver: es la senal de que no se perdio nada.
+   Se toca a mano porque abrir el visor no dispara render(). */
+function marcarVuelta(){
+  var b = document.getElementById("tboth");
+  if(b && cargado.def) b.textContent = "Volver al recorrido";
+}
+
+/* Cerrar NO descarga nada: esa es toda la gracia. */
 function cerrarTour(){
   var dlg = document.getElementById("tour");
   if(!dlg) return;
-  pintarTour(null);          /* vacia los dos src */
-  tourActual = null;
   if(typeof dlg.close === "function" && dlg.open) dlg.close();
   else dlg.removeAttribute("open");
 }
+
 function wireTour(){
   var dlg = document.getElementById("tour");
   if(!dlg) return;
+
   dlg.addEventListener("click", function(ev){
-    var sw = ev.target.closest("[data-tour]");
-    if(sw){ abrirTour(sw.getAttribute("data-tour")); return; }
+    var chip = ev.target.closest("[data-esp]");
+    if(chip){ abrirTour(chip.getAttribute("data-esp")); return; }
+    if(ev.target.closest("#tour-reset")){
+      /* La salida si dos escenas WebGL vivas ponen lento el navegador:
+         los vuelve a cargar donde estaban. */
+      cargado = {def:"", mej:""};
+      pintarTour(tourEsp);
+      return;
+    }
     if(ev.target.closest("#tour-x")) cerrarTour();
   });
-  /* Esc dispara close: hay que vaciar el src igual */
-  /* Esc dispara close directamente: hay que vaciar los src igual */
-  dlg.addEventListener("close", function(){
-    pintarTour(null);
-    tourActual = null;
+
+  /* El aviso de "cargando" se quita cuando el iframe termina. Va con
+     capture porque load no burbujea. */
+  ["def","mej"].forEach(function(k){
+    var ifr = document.getElementById("tour-if-"+k);
+    if(!ifr) return;
+    ifr.addEventListener("load", function(){
+      if(ifr.parentNode) ifr.parentNode.removeAttribute("data-load");
+    });
   });
 }
 
@@ -1931,8 +2154,12 @@ function wire(){
       });
       save(); render(); return;
     }
+    /* Va despues de la rama de .seg button[data-c]: el boton 3D no
+       lleva data-c, asi que no se pisan. */
+    var e3 = ev.target.closest("[data-esp]");
+    if(e3){ abrirTour(e3.getAttribute("data-esp")); return; }
     var tt = ev.target.closest("[data-tour]");
-    if(tt){ abrirTour(tt.getAttribute("data-tour")); return; }
+    if(tt){ abrirTour(); return; }
     var tb = ev.target.closest("[data-todas]");
     if(tb){
       var abrir = tb.getAttribute("data-todas")==="1";
@@ -2028,6 +2255,7 @@ function boot(){
   arrancado = true;
   var av = document.querySelector(".alert");
   if(av) av.hidden = false;
+  leerAnclas();   /* antes de render(): decide que items llevan boton 3D */
   load();
   render();
   wire();
