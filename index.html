@@ -4,23 +4,30 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>57Apps</title>
-<style>
-  :root { color-scheme: light dark; --bg:#fff; --fg:#1a1a1a; --muted:#555; }
-  @media (prefers-color-scheme: dark) { :root { --bg:#14161a; --fg:#e8e8e8; --muted:#a0a0a0; } }
-  body {
-    background: var(--bg); color: var(--fg);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    max-width: 640px; margin: 4rem auto; padding: 0 1.5rem; line-height: 1.6;
-  }
-  a { color: inherit; text-decoration: underline; }
-  .muted { color: var(--muted); }
-</style>
+<meta name="description" content="A small suite of focused apps.">
+<meta name="theme-color" content="#FAF4EC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#191512" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/style.css">
 </head>
 <body>
+
 <h1>57Apps</h1>
-<p class="muted">A small suite of focused apps.</p>
-<ul>
-  <li><a href="headsup/privacy-policy.html">Heads Up — Privacy Policy</a></li>
-</ul>
+<p class="lede">A small suite of focused apps.</p>
+
+<div class="card">
+  <h2>Heads Up</h2>
+  <p>Reminders that stay put until you actually deal with them. Free, on
+  Android.</p>
+  <p><a href="/headsup/">About Heads Up</a></p>
+</div>
+
+<footer class="site">
+  <a href="/headsup/privacy-policy.html">Heads Up privacy policy</a>
+  <a href="/headsup/terms.html">Terms</a>
+  <a href="mailto:contact@57apps.com">contact@57apps.com</a>
+</footer>
+
 </body>
 </html>
