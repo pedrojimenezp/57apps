@@ -318,7 +318,7 @@
       }
       .tally-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr) auto;
+        grid-template-columns: repeat(5, 1fr);
         gap: 1px;
         background: var(--line);
         border: 1px solid var(--line);
@@ -326,7 +326,11 @@
       }
       @media (max-width: 700px) {
         .tally-grid {
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: repeat(2, 1fr);
+        }
+        /* la 5a cifra queda sola en su fila en vez de dejar media celda vacia */
+        .tally-grid > div:nth-child(5) {
+          grid-column: 1/-1;
         }
       }
       .tally-grid > div {
@@ -336,11 +340,20 @@
       .tally .lab {
         font-family: 'IBM Plex Mono', ui-monospace, monospace;
         font-size: 12px;
+        line-height: 1.3;
         letter-spacing: 0.11em;
         text-transform: uppercase;
         color: var(--ink-3);
         display: block;
         margin-bottom: 3px;
+      }
+      /* Con las cinco columnas, «Si confirmas los quizás» no cabe en una
+   linea. Se le reserva el alto de dos a todas las etiquetas para que las
+   cinco cifras queden alineadas entre si, en vez de que esa caiga sola. */
+      @media (min-width: 701px) {
+        .tally .lab {
+          min-height: 2.6em;
+        }
       }
       .tally .fig {
         font-family: 'IBM Plex Mono', ui-monospace, monospace;
@@ -355,6 +368,9 @@
       }
       .fig.less {
         color: var(--minus);
+      }
+      .fig.maybe {
+        color: var(--quiza);
       }
       .tally .fig-sub,
       .pctline {
@@ -602,16 +618,15 @@
         border-top: 1px solid var(--line-2);
         font-size: 13px !important;
       }
+      /* Segunda fila de la barra: los cuatro botones a todo el ancho, debajo
+   de las cifras. Es incondicional a proposito — con cinco columnas de
+   cifras ya no cabe una sexta columna de botones en escritorio. */
       .tally .acts {
         display: flex;
         align-items: center;
         gap: 7px;
         flex-wrap: wrap;
-      }
-      @media (max-width: 700px) {
-        .tally .acts {
-          grid-column: 1/-1;
-        }
+        grid-column: 1/-1;
       }
       .tally-note {
         background: var(--alert);
@@ -3469,6 +3484,13 @@
             sub(t.nQPlus, t.plus + t.qPlus) +
             pctLine(t.plus) +
             '</div>' +
+            '<div><span class="lab">Quizás (' +
+            t.nQ +
+            ')</span><span class="fig maybe">' +
+            cop(t.qPlus + t.qMinus) +
+            '</span>' +
+            pctLine(t.qPlus + t.qMinus) +
+            '</div>' +
             '<div><span class="lab">Renuncias (' +
             t.nMinus +
             ')</span><span class="fig less">' +
@@ -3480,8 +3502,12 @@
             '<div><span class="lab">Estimado neto</span><span class="fig">' +
             cop(t.net) +
             '</span>' +
-            sub(t.nQ, t.net + t.qPlus + t.qMinus) +
             pctLine(t.net) +
+            '</div>' +
+            '<div><span class="lab">Si confirmas los quizás</span><span class="fig">' +
+            cop(t.net + t.qPlus + t.qMinus) +
+            '</span>' +
+            pctLine(t.net + t.qPlus + t.qMinus) +
             '</div>' +
             '<div class="acts no-print">' +
             '<button class="btn" id="theme" type="button">Tema</button>' +
