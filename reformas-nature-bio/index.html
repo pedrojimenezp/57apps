@@ -589,7 +589,9 @@
       ul.entrega li:first-child {
         border-top: none;
       }
-      ul.entrega li b {
+      /* Solo el hijo directo es el codigo: las descripciones llevan sus
+   propios <b> dentro del <span> y no deben salir en mono de color. */
+      ul.entrega li > b {
         font-family: 'IBM Plex Mono', ui-monospace, monospace;
         font-size: 12px;
         color: var(--minus);
@@ -600,8 +602,29 @@
         flex: 1 1 260px;
         color: var(--ink);
       }
-      ul.entrega.duda li b {
+      ul.entrega.duda li > b {
         color: var(--quiza);
+      }
+      ul.entrega.mej li > b {
+        color: var(--si);
+      }
+      /* El nombre del item va en un span y no en un <b>: 'ul.entrega li b' es
+   descendiente y le pondria el mono rojo del codigo. */
+      ul.entrega li .enom {
+        display: block;
+        font-weight: 600;
+        color: var(--ink);
+        margin-bottom: 2px;
+      }
+      /* !important por lo mismo que .dudastit: .block p gana por especificidad */
+      .entrega-h {
+        font-family: 'IBM Plex Mono', ui-monospace, monospace;
+        font-size: 11.5px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink-3) !important;
+        font-weight: 600;
+        margin: 18px 0 6px !important;
       }
       ul.entrega.duda li span {
         color: var(--ink-2);
@@ -668,6 +691,16 @@
       .btn.primary:hover {
         background: var(--brand-2);
         border-color: var(--brand-2);
+      }
+      .btn.danger {
+        background: var(--minus-fill);
+        color: var(--on-brand);
+        border-color: var(--minus-fill);
+      }
+      /* --minus y --minus-fill son el mismo color en los dos temas, asi que
+   el hover no puede ir por token: se oscurece el boton entero. */
+      .btn.danger:hover {
+        opacity: 0.88;
       }
       :focus-visible {
         outline: 2px solid var(--brand);
@@ -1021,6 +1054,133 @@
       #gate .btn {
         width: 100%;
         justify-content: center;
+      }
+
+      /* Los dos dialogos de la barra: confirmar el reinicio y ver el archivo
+   antes de bajarlo. Comparten caja con #gate a proposito — es el mismo
+   gesto de "algo se abre encima" y no hacia falta un segundo lenguaje. */
+      #wipe,
+      #dl {
+        border: none;
+        padding: 0;
+        background: var(--surface);
+        color: var(--ink);
+        box-shadow: 0 12px 60px rgba(0, 0, 0, 0.4);
+      }
+      #wipe {
+        width: min(440px, 92vw);
+      }
+      #dl {
+        width: min(760px, 94vw);
+        max-height: 92vh;
+      }
+      #wipe::backdrop,
+      #dl::backdrop {
+        background: rgba(8, 12, 16, 0.82);
+      }
+      .dlg-bar {
+        display: flex;
+        gap: 4px 14px;
+        align-items: baseline;
+        flex-wrap: wrap;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--line);
+        background: var(--surface-2);
+      }
+      .dlg-h {
+        font-family: 'IBM Plex Sans Condensed', 'IBM Plex Sans', sans-serif;
+        font-weight: 700;
+        font-size: 17px;
+        margin: 0;
+      }
+      .dlg-file {
+        font-family: 'IBM Plex Mono', ui-monospace, monospace;
+        font-size: 12px;
+        color: var(--ink-2);
+        margin: 0;
+        overflow-wrap: anywhere;
+      }
+      .dlg-body {
+        padding: 18px;
+      }
+      .dlg-body > p {
+        margin: 0 0 14px;
+        font-size: 13.5px;
+        line-height: 1.5;
+        color: var(--ink-2);
+      }
+      .dlg-body > p:last-child {
+        margin-bottom: 0;
+      }
+      .dlg-list {
+        margin: 0 0 14px;
+        padding: 0;
+        list-style: none;
+      }
+      .dlg-list li {
+        display: flex;
+        gap: 10px;
+        padding: 8px 0;
+        border-top: 1px solid var(--line-2);
+        font-size: 13.5px;
+        line-height: 1.5;
+      }
+      .dlg-list .mk {
+        font-family: 'IBM Plex Mono', ui-monospace, monospace;
+        font-size: 11.5px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        flex: none;
+        padding-top: 2px;
+      }
+      .dlg-list .va .mk {
+        color: var(--minus);
+      }
+      .dlg-list .queda .mk {
+        color: var(--si);
+      }
+      .dl-pre {
+        margin: 0 0 14px;
+        padding: 12px 14px;
+        background: var(--surface-2);
+        border: 1px solid var(--line);
+        border-radius: 3px;
+        font-family: 'IBM Plex Mono', ui-monospace, monospace;
+        font-size: 12.5px;
+        line-height: 1.5;
+        color: var(--ink);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        max-height: 46vh;
+        overflow: auto;
+      }
+      .dlg-in {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 12px;
+        font-family: 'IBM Plex Mono', ui-monospace, monospace;
+        font-size: 13px;
+        padding: 9px 10px;
+        background: var(--surface);
+        color: var(--ink);
+        border: 1px solid var(--line);
+        border-radius: 3px;
+      }
+      .dlg-acts {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        padding: 14px 18px;
+        border-top: 1px solid var(--line);
+        background: var(--surface-2);
+      }
+      /* El ¡Copiado! del modal, con el mismo verde que el del banner azul. */
+      .dlg-acts .btn[data-ok] {
+        background: var(--si-fill);
+        border-color: var(--si-fill);
+        color: var(--on-brand);
       }
 
       /* visor */
@@ -1798,6 +1958,73 @@
         </p>
         <button type="submit" class="btn primary">Entrar</button>
       </form>
+    </dialog>
+
+    <!-- Los dos dialogos de la barra viven FUERA de #app por lo mismo que la
+     puerta y el visor: render() reescribe #app entero en cada clic. -->
+    <dialog id="wipe" class="no-print" aria-labelledby="wipe-h">
+      <div class="dlg-bar">
+        <p class="dlg-h" id="wipe-h">¿Reiniciar tus decisiones?</p>
+      </div>
+      <div class="dlg-body">
+        <p>
+          Todas las filas vuelven a <b>como te entregan el apartamento</b>
+          —sin mejoras y sin renuncias, $ 0— y se borran las notas que
+          escribiste.
+        </p>
+        <ul class="dlg-list">
+          <li class="va">
+            <span class="mk">SE BORRA</span
+            ><span>Todas tus decisiones y todas tus notas.</span>
+          </li>
+          <li class="queda">
+            <span class="mk">SE QUEDA</span
+            ><span
+              >Tu tipología, tu piso, el precio del apartamento y el tema.</span
+            >
+          </li>
+        </ul>
+        <p>No hay deshacer, y el enlace que compartas cambia con esto.</p>
+      </div>
+      <div class="dlg-acts">
+        <button type="button" class="btn" id="wipe-x">Cancelar</button>
+        <button type="button" class="btn danger" id="wipe-go">
+          Sí, reiniciar
+        </button>
+      </div>
+    </dialog>
+
+    <dialog id="dl" class="no-print" aria-labelledby="dl-h">
+      <div class="dlg-bar">
+        <p class="dlg-h" id="dl-h">Esto es lo que se va a descargar</p>
+        <p class="dlg-file" id="dl-file"></p>
+      </div>
+      <div class="dlg-body">
+        <pre class="dl-pre" id="dl-pre"></pre>
+        <p>
+          Puedes enviarle este archivo a tu asesor tal cual. Si prefieres no
+          mandar un archivo, cópiale el enlace: lleva tu tipología, tu piso y
+          todas tus decisiones, pero <b>no</b> tus notas ni el precio del
+          apartamento.
+        </p>
+        <input
+          class="dlg-in"
+          id="dl-in"
+          type="text"
+          readonly
+          hidden
+          aria-label="Enlace para copiar"
+        />
+      </div>
+      <div class="dlg-acts">
+        <button type="button" class="btn" id="dl-x">Cerrar</button>
+        <button type="button" class="btn" id="dl-copy">
+          Copiar enlace para mi asesor
+        </button>
+        <button type="button" class="btn primary" id="dl-go">
+          Descargar el archivo
+        </button>
+      </div>
     </dialog>
 
     <div class="alert" role="alert" hidden>
@@ -3036,11 +3263,74 @@
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;');
         }
+        /* up se pinta como HTML en la ficha, asi que para el .txt hay que
+   aplanarlo: si no, el archivo sale con <b> y <br> dentro. */
+        function plano(s) {
+          return String(s)
+            .replace(/<br\s*\/?>/gi, '\n')
+            .replace(/<[^>]*>/g, '')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&amp;/g, '&')
+            .replace(/[ \t]+/g, ' ')
+            .replace(/\n{3,}/g, '\n\n')
+            .trim();
+        }
+
+        /* El .txt no envuelve en ningun otro sitio, pero aqui las descripciones
+   son parrafos enteros: sin envolver salen lineas de 400 caracteres. */
+        function envuelve(txt, ancho, sangria) {
+          var pad = new Array(sangria + 1).join(' ');
+          var libre = ancho - sangria;
+          var out = [];
+          String(txt)
+            .split('\n')
+            .forEach(function (parrafo) {
+              if (!parrafo.trim()) {
+                out.push('');
+                return;
+              }
+              var linea = '';
+              parrafo
+                .trim()
+                .split(/\s+/)
+                .forEach(function (w) {
+                  if (!linea) linea = w;
+                  else if (linea.length + 1 + w.length <= libre)
+                    linea += ' ' + w;
+                  else {
+                    out.push(pad + linea);
+                    linea = w;
+                  }
+                });
+              if (linea) out.push(pad + linea);
+            });
+          return out.join('\n');
+        }
+
         function itemBy(c) {
           for (var i = 0; i < ITEMS.length; i++)
             if (ITEMS[i].c === c) return ITEMS[i];
           return null;
         }
+        /* Lo que entra en el inventario de entrega. Una mejora entra si tiene
+   descripcion de acabado y una renuncia si ENTREGA dice como te queda la
+   zona; la pagina y el .txt comparten exactamente esta seleccion. */
+        function entregaDe(neg, v) {
+          return ITEMS.filter(function (it) {
+            return (
+              !!it.neg === neg &&
+              applies(it.c) &&
+              dec(it.c) === v &&
+              (neg ? ENTREGA[it.c] : it.up)
+            );
+          });
+        }
+        function entregaTexto(it) {
+          return it.neg ? ENTREGA[it.c] : it.up;
+        }
+
         /* dependencias de un item, filtradas a las que aplican a esta tipologia */
         function needsOf(it) {
           if (!it.needs) return [];
@@ -3070,7 +3360,7 @@
           });
         }
 
-        /* Los campos plus/minus/net son SOLO los confirmados; exportTxt() y el
+        /* Los campos plus/minus/net son SOLO los confirmados; textoExport() y el
    pie ya dependen de eso. Los quiza van aparte en qPlus/qMinus.
    nCambios cuenta lo que se separa del apartamento por defecto, que es el
    estado en que arranca la pagina. */
@@ -3136,6 +3426,21 @@
             ? '<span class="pctline">' + s + ' del apartamento</span>'
             : '';
         }
+        /* El atributo data-theme puede no existir todavia (seguimos al
+   sistema), asi que el rotulo sale del tema que se esta VIENDO y no del
+   atributo: si no, el primer boton mentiria. */
+        function temaActual() {
+          var a = document.documentElement.getAttribute('data-theme');
+          if (a === 'dark' || a === 'light') return a;
+          return window.matchMedia &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? 'dark'
+            : 'light';
+        }
+        function rotuloTema() {
+          return temaActual() === 'dark' ? 'Tema claro' : 'Tema oscuro';
+        }
+
         function parsePrecio(s) {
           var n = parseInt(String(s).replace(/[^\d]/g, ''), 10);
           return isNaN(n) || n <= 0 ? 0 : n;
@@ -3510,8 +3815,10 @@
             pctLine(t.net + t.qPlus + t.qMinus) +
             '</div>' +
             '<div class="acts no-print">' +
-            '<button class="btn" id="theme" type="button">Tema</button>' +
-            '<button class="btn" id="reset" type="button">Limpiar</button>' +
+            '<button class="btn" id="theme" type="button">' +
+            rotuloTema() +
+            '</button>' +
+            '<button class="btn" id="reset" type="button">Reiniciar parámetros</button>' +
             '<button class="btn" id="print" type="button">Imprimir</button>' +
             '<button class="btn primary" id="export" type="button">Descargar</button>' +
             '</div></div>' +
@@ -3682,65 +3989,90 @@
               ' Vuelve a <b>Todo</b> para verlos.</p></div></div>';
           }
 
-          /* como te entregan el apartamento */
-          var renuncias = ITEMS.filter(function (it) {
-            return (
-              it.neg && applies(it.c) && dec(it.c) === 'si' && ENTREGA[it.c]
-            );
-          });
-          var dudas = ITEMS.filter(function (it) {
-            return (
-              it.neg && applies(it.c) && dec(it.c) === 'quiza' && ENTREGA[it.c]
-            );
-          });
+          /* como te entregan el apartamento: el inventario de las dos
+             direcciones en que tu seleccion se separa del apartamento por
+             defecto. Las mejoras traen su descripcion de acabado y las
+             renuncias la frase de ENTREGA, que es lo que cada una significa
+             en obra. */
+          var mejSi = entregaDe(false, 'si');
+          var renSi = entregaDe(true, 'si');
+          var dudas = entregaDe(false, 'quiza').concat(entregaDe(true, 'quiza'));
+
+          function entLista(rows, clase) {
+            var u = '<ul class="entrega' + (clase ? ' ' + clase : '') + '">';
+            for (var e = 0; e < rows.length; e++) {
+              u +=
+                '<li><b>' +
+                rows[e].c +
+                '</b><span><span class="enom">' +
+                esc(rows[e].t) +
+                '</span>' +
+                entregaTexto(rows[e]) +
+                '</span></li>';
+            }
+            return u + '</ul>';
+          }
+
           var cEnt = '<div class="block">';
-          if (!renuncias.length && !dudas.length) {
+          if (!mejSi.length && !renSi.length) {
             cEnt +=
               '<p>No has marcado ninguna renuncia, así que <b>te entregan el apartamento completo</b>, con todos sus acabados.</p>';
-          } else {
-            if (renuncias.length) {
-              cEnt += '<ul class="entrega">';
-              for (var e = 0; e < renuncias.length; e++) {
-                cEnt +=
-                  '<li><b>' +
-                  renuncias[e].c +
-                  '</b><span>' +
-                  ENTREGA[renuncias[e].c] +
-                  '</span></li>';
-              }
-              cEnt += '</ul>';
-            }
-            if (dudas.length) {
-              cEnt +=
-                '<p class="dudastit">Y si además confirmas los que dejaste en quizá:</p><ul class="entrega duda">';
-              for (var e2 = 0; e2 < dudas.length; e2++) {
-                cEnt +=
-                  '<li><b>' +
-                  dudas[e2].c +
-                  '</b><span>' +
-                  ENTREGA[dudas[e2].c] +
-                  '</span></li>';
-              }
-              cEnt += '</ul>';
-            }
+          } else if (!mejSi.length) {
             cEnt +=
-              '<p class="cierre">Todo lo anterior tendrías que hacerlo por tu cuenta después de la entrega.</p>';
+              '<p>Te entregan el apartamento con sus acabados por defecto, <b>menos estas zonas</b>:</p>';
+          } else {
+            cEnt +=
+              '<p>Te entregan el apartamento <b>con todos sus acabados</b>, e incluyen estas mejoras:</p>';
+          }
+          /* Los encabezados solo hacen falta cuando hay dos listas: con una
+             sola, el parrafo de arriba ya dice cual es. */
+          var dosListas = mejSi.length && renSi.length;
+          if (mejSi.length) {
+            if (dosListas)
+              cEnt += '<p class="entrega-h">Las mejoras que incluyen</p>';
+            cEnt += entLista(mejSi, 'mej');
+          }
+          if (renSi.length) {
+            if (dosListas)
+              cEnt += '<p class="entrega-h">Lo que te entregan sin terminar</p>';
+            cEnt += entLista(renSi, '');
+          }
+          if (dudas.length) {
+            cEnt +=
+              '<p class="dudastit">Y si además confirmas los que dejaste en quizá:</p>' +
+              entLista(dudas, 'duda');
+          }
+          var hayRen =
+            renSi.length ||
+            dudas.filter(function (it) {
+              return it.neg;
+            }).length;
+          if (hayRen) {
+            cEnt +=
+              '<p class="cierre">Lo que aparece como renuncia tendrías que hacerlo por tu cuenta después de la entrega.</p>';
           }
           cEnt += '</div>';
-          var nEnt = renuncias.length + dudas.length;
+
+          var chipEnt = '';
+          if (mejSi.length)
+            chipEnt +=
+              '<span class="sum-ok">' +
+              mejSi.length +
+              (mejSi.length === 1 ? ' mejora' : ' mejoras') +
+              '</span>';
+          if (renSi.length)
+            chipEnt +=
+              '<span class="sum-b">' +
+              renSi.length +
+              (renSi.length === 1 ? ' renuncia' : ' renuncias') +
+              '</span>';
           h += seccion(
             'entrega',
             'Consecuencia',
             'Así te entregan el apartamento',
-            'Lo que significa, en concreto, cada renuncia que marcaste. Sale del texto de la propia lista de precios.',
+            'El inventario de lo que te entregarían con lo que llevas marcado: las mejoras con el acabado que traen y las renuncias con lo que dejan sin hacer. Sale del texto de la propia lista de precios.',
             cEnt,
-            nEnt
-              ? '<span class="sum-b">' +
-                  nEnt +
-                  ' ' +
-                  (nEnt === 1 ? 'zona afectada' : 'zonas afectadas') +
-                  '</span>'
-              : '<span class="sum-ok">apartamento completo</span>',
+            chipEnt || '<span class="sum-ok">apartamento completo</span>',
           );
 
           /* cierre */
@@ -3828,10 +4160,15 @@
 
         /* El hash ya lleva tipo, piso y decisiones; esto solo lo pone al alcance.
    Si clipboard no esta (contexto inseguro, navegador viejo) se cae a un
-   campo seleccionado para copiar a mano: nunca se queda sin salida. */
-        function copiarEnlace(btn) {
+   campo seleccionado para copiar a mano: nunca se queda sin salida.
+   El rotulo se lee del propio boton en vez de escribirlo aqui, porque la
+   usan dos: el del banner azul y el del modal de descarga. */
+        function copiarEnlace(btn, campo) {
+          /* Con el ¡Copiado! puesto, el rotulo de verdad ya no esta en el
+             boton: un segundo clic guardaria '¡Copiado!' como rotulo. */
+          if (btn && btn.hasAttribute('data-ok')) return;
           var url = location.href;
-          var campo = document.getElementById('share-in');
+          var antes = btn ? btn.textContent : '';
           function aMano() {
             if (!campo) return;
             campo.hidden = false;
@@ -3842,7 +4179,6 @@
           }
           function listo() {
             if (!btn) return;
-            var antes = 'Copiar enlace para mi asesor';
             btn.textContent = '¡Copiado!';
             btn.setAttribute('data-ok', '');
             setTimeout(function () {
@@ -3857,7 +4193,19 @@
           }
         }
 
-        function exportTxt() {
+        function nombreArchivo() {
+          return (
+            'reformas-nature-bio-tipo' +
+            state.tipo +
+            '-piso' +
+            state.piso +
+            '.txt'
+          );
+        }
+
+        /* Armar el texto y bajarlo son dos cosas distintas desde que el boton
+   ensena antes el contenido: el modal pinta justo esto. */
+        function textoExport() {
           var t = totals(),
             sheet = SHEETS[col()];
           var L = [
@@ -3926,38 +4274,152 @@
             );
           }
 
-          var ent = ITEMS.filter(function (it) {
-            return (
-              it.neg && applies(it.c) && dec(it.c) === 'si' && ENTREGA[it.c]
-            );
-          });
-          if (ent.length) {
-            L.push('', 'ASI ME ENTREGARIAN EL APARTAMENTO');
-            ent.forEach(function (it) {
-              L.push('  ' + it.c + '  ' + ENTREGA[it.c]);
+          /* El mismo inventario que la seccion de la pagina, con la misma
+             seleccion. Las descripciones se aplanan y se envuelven a 72
+             columnas, sangradas bajo el nombre del item. */
+          function entFilas(rows) {
+            var out = [];
+            rows.forEach(function (it, i) {
+              if (i) out.push('');
+              out.push('  ' + it.c + '  ' + it.t);
+              out.push(envuelve(plano(entregaTexto(it)), 72, 8));
             });
+            return out;
+          }
+          var mejE = entregaDe(false, 'si');
+          var renE = entregaDe(true, 'si');
+          var dudE = entregaDe(false, 'quiza').concat(entregaDe(true, 'quiza'));
+
+          L.push('', 'ASI ME ENTREGARIAN EL APARTAMENTO');
+          if (!mejE.length && !renE.length) {
+            L.push(
+              '',
+              'El apartamento completo, con todos sus acabados por defecto.',
+            );
+          }
+          if (mejE.length) {
+            L.push('', 'Con todos sus acabados, e incluyendo estas mejoras:');
+            L = L.concat(entFilas(mejE));
+          }
+          if (renE.length) {
+            L.push(
+              '',
+              mejE.length
+                ? 'Y estas zonas sin terminar, por las renuncias que marcaste:'
+                : 'Con sus acabados por defecto, menos estas zonas:',
+            );
+            L = L.concat(entFilas(renE));
+          }
+          if (dudE.length) {
+            L.push('', 'Y si ademas confirmas los que dejaste en quiza:');
+            L = L.concat(entFilas(dudE));
           }
 
           L.push('', DISCLAIM);
 
-          var blob = new Blob([L.join('\n')], {
+          return L.join('\n');
+        }
+
+        function descargarTxt() {
+          var blob = new Blob([textoExport()], {
             type: 'text/plain;charset=utf-8',
           });
           var url = URL.createObjectURL(blob);
           var a = document.createElement('a');
           a.href = url;
-          a.download =
-            'reformas-nature-bio-tipo' +
-            state.tipo +
-            '-piso' +
-            state.piso +
-            '.txt';
+          a.download = nombreArchivo();
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
           setTimeout(function () {
             URL.revokeObjectURL(url);
           }, 1000);
+        }
+
+        /* ---------------------- dialogos de la barra -------------------- */
+        /* Los dos viven fuera de #app y se cablean UNA vez desde boot().
+   abrirPuerta() registra los suyos dentro de la propia funcion de
+   apertura y por eso no se puede llamar dos veces; aqui no se repite ese
+   vicio. */
+        function abrirDialogo(id, foco) {
+          var dlg = document.getElementById(id);
+          if (!dlg) return null;
+          if (typeof dlg.showModal === 'function') {
+            if (!dlg.open) dlg.showModal();
+          } else dlg.setAttribute('open', '');
+          var f = foco && document.getElementById(foco);
+          if (f) f.focus();
+          return dlg;
+        }
+
+        function cerrarDialogo(dlg) {
+          if (!dlg) return;
+          if (typeof dlg.close === 'function' && dlg.open) dlg.close();
+          else dlg.removeAttribute('open');
+        }
+
+        /* La vista previa sale de textoExport(), la misma fuente que el
+   archivo: lo que se lee aqui es exactamente lo que se baja. */
+        function abrirDescarga() {
+          var pre = document.getElementById('dl-pre');
+          var nom = document.getElementById('dl-file');
+          var campo = document.getElementById('dl-in');
+          if (pre) pre.textContent = textoExport();
+          if (nom) nom.textContent = nombreArchivo();
+          if (campo) {
+            campo.hidden = true;
+            campo.value = '';
+          }
+          abrirDialogo('dl', 'dl-go');
+        }
+
+        function wireDialogs() {
+          var wipe = document.getElementById('wipe');
+          var dl = document.getElementById('dl');
+
+          if (wipe) {
+            wipe.addEventListener('click', function (ev) {
+              /* El clic en el fondo llega al dialogo mismo: es la unica forma
+                 de distinguirlo de un clic dentro de su contenido. */
+              if (ev.target === wipe || ev.target.closest('#wipe-x')) {
+                cerrarDialogo(wipe);
+                return;
+              }
+              if (ev.target.closest('#wipe-go')) {
+                state.d = {};
+                state.n = {};
+                save();
+                /* render() ANTES de cerrar: el listener de 'close' devuelve el
+                   foco a #reset, y render() lo reemplaza por uno nuevo. */
+                render();
+                cerrarDialogo(wipe);
+              }
+            });
+            /* Cancelar, Escape y el fondo acaban todos aqui. */
+            wipe.addEventListener('close', function () {
+              var b = document.getElementById('reset');
+              if (b) b.focus({ preventScroll: true });
+            });
+          }
+
+          if (dl) {
+            dl.addEventListener('click', function (ev) {
+              if (ev.target === dl || ev.target.closest('#dl-x')) {
+                cerrarDialogo(dl);
+                return;
+              }
+              if (ev.target.closest('#dl-go')) {
+                descargarTxt();
+                return;
+              }
+              var cp = ev.target.closest('#dl-copy');
+              if (cp) copiarEnlace(cp, document.getElementById('dl-in'));
+            });
+            dl.addEventListener('close', function () {
+              var b = document.getElementById('export');
+              if (b) b.focus({ preventScroll: true });
+            });
+          }
         }
 
         /* El visor. Vive fuera de #app, asi que se controla aparte y render()
@@ -4185,14 +4647,14 @@
               return;
             }
             if (ev.target.closest('#reset')) {
-              state.d = {};
-              state.n = {};
-              save();
-              render();
+              abrirDialogo('wipe', 'wipe-x');
               return;
             }
             if (ev.target.closest('#share')) {
-              copiarEnlace(ev.target.closest('#share'));
+              copiarEnlace(
+                ev.target.closest('#share'),
+                document.getElementById('share-in'),
+              );
               return;
             }
             if (ev.target.closest('#print')) {
@@ -4200,22 +4662,16 @@
               return;
             }
             if (ev.target.closest('#export')) {
-              exportTxt();
+              abrirDescarga();
               return;
             }
-            if (ev.target.closest('#theme')) {
-              var cur = document.documentElement.getAttribute('data-theme');
-              var next =
-                cur === 'dark'
-                  ? 'light'
-                  : cur === 'light'
-                    ? 'dark'
-                    : window.matchMedia &&
-                        window.matchMedia('(prefers-color-scheme: dark)')
-                          .matches
-                      ? 'light'
-                      : 'dark';
+            var thb = ev.target.closest('#theme');
+            if (thb) {
+              /* temaActual() ya resuelve el caso de seguir al sistema, asi que
+                 la primera pulsacion sigue saliendose de esa preferencia. */
+              var next = temaActual() === 'dark' ? 'light' : 'dark';
               document.documentElement.setAttribute('data-theme', next);
+              thb.textContent = rotuloTema();
               try {
                 localStorage.setItem(LS + '-theme', next);
               } catch (e) {}
@@ -4316,7 +4772,20 @@
           render();
           wire();
           wireTour();
+          wireDialogs();
           wireFab();
+          /* Sin tema fijado seguimos al sistema, asi que el rotulo del boton
+             se queda viejo si el sistema cambia solo. */
+          if (window.matchMedia) {
+            var mq = window.matchMedia('(prefers-color-scheme: dark)');
+            var repinta = function () {
+              var b = document.getElementById('theme');
+              if (b && !document.documentElement.getAttribute('data-theme'))
+                b.textContent = rotuloTema();
+            };
+            if (mq.addEventListener) mq.addEventListener('change', repinta);
+            else if (mq.addListener) mq.addListener(repinta);
+          }
         }
 
         /* ------------------------- la puerta ---------------------------- */
