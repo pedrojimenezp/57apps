@@ -16,6 +16,18 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
     />
+    <!-- Analitica sin cookies. no_onload apaga el conteo automatico al cargar:
+         la visita se emite desde boot(), o sea al pasar la puerta, para no
+         contar robots ni a quien no tiene la contrasena. -->
+    <script>
+      window.goatcounter = { no_onload: true };
+    </script>
+    <script
+      id="gc"
+      data-goatcounter="https://57apps.goatcounter.com/count"
+      async
+      src="//gc.zgo.at/count.js"
+    ></script>
     <style>
       :root {
         --brand: #1b4e8c;
@@ -3309,6 +3321,51 @@
           return out.join('\n');
         }
 
+        /* ---------------------- analitica ----------------------- */
+        /* Tres reglas, y las tres importan:
+   - NUNCA se manda location.href: el hash lleva las decisiones de quien
+     mira. Cada llamada trae su nombre escrito a mano.
+   - Fuera del dominio real no se manda nada, para que las pruebas en jsdom
+     y las copias de trabajo no ensucien el panel.
+   - Si el beacon esta bloqueado —gc.zgo.at cae en muchas listas de filtrado—
+     la pagina no puede enterarse: de ahi el try/catch mudo. */
+        var MIDO =
+          location.hostname === 'www.57apps.com' &&
+          navigator.doNotTrack !== '1' &&
+          window.doNotTrack !== '1';
+
+        /* count.js es async: la vista de boot() puede salir antes de que
+           cargue, asi que se encola y se suelta cuando el beacon exista. El
+           tope es por si nunca llega (bloqueado): la cola no puede crecer. */
+        var cola = [];
+        function suelta() {
+          if (!window.goatcounter || !window.goatcounter.count) return false;
+          while (cola.length) {
+            try {
+              window.goatcounter.count(cola.shift());
+            } catch (e) {}
+          }
+          return true;
+        }
+        function mide(nombre, esEvento) {
+          if (!MIDO) return;
+          if (cola.length > 40) return;
+          cola.push({ path: nombre, event: !!esEvento });
+          if (suelta()) return;
+          var sc = document.getElementById('gc');
+          if (sc && !sc.enEspera) {
+            sc.enEspera = true;
+            sc.addEventListener('load', suelta);
+          }
+        }
+        /* De estas interesa que pasaron, no cuantas veces. */
+        var medido = {};
+        function mideUnaVez(nombre) {
+          if (medido[nombre]) return;
+          medido[nombre] = true;
+          mide(nombre, true);
+        }
+
         function itemBy(c) {
           for (var i = 0; i < ITEMS.length; i++)
             if (ITEMS[i].c === c) return ITEMS[i];
@@ -4114,6 +4171,8 @@
             (t.nCambios === 1
               ? ' cambio sobre el apartamento por defecto.<br>'
               : ' cambios sobre el apartamento por defecto.<br>') +
+            'Esta página cuenta visitas y clics con GoatCounter, sin cookies: ' +
+            'tus decisiones, tus notas y el precio no salen de tu navegador.<br>' +
             '<a href="/">57apps</a></p>';
 
           document.getElementById('app').innerHTML = h;
@@ -4134,6 +4193,8 @@
              de llegar al estado "sin tocar" y la razon de que 'no' y vacio
              fueran indistinguibles. */
           if (decUI(c) === v) return;
+          mideUnaVez('primera-decision');
+          mide('item-' + c + '-' + v, true);
           if (v === 'no') {
             state.d[c] = '';
             save();
@@ -4167,6 +4228,7 @@
           /* Con el ¡Copiado! puesto, el rotulo de verdad ya no esta en el
              boton: un segundo clic guardaria '¡Copiado!' como rotulo. */
           if (btn && btn.hasAttribute('data-ok')) return;
+          mide('copio-enlace', true);
           var url = location.href;
           var antes = btn ? btn.textContent : '';
           function aMano() {
@@ -4321,6 +4383,7 @@
         }
 
         function descargarTxt() {
+          mide('descargo-archivo', true);
           var blob = new Blob([textoExport()], {
             type: 'text/plain;charset=utf-8',
           });
@@ -4370,6 +4433,7 @@
             campo.hidden = true;
             campo.value = '';
           }
+          mide('abrio-descarga', true);
           abrirDialogo('dl', 'dl-go');
         }
 
@@ -4386,6 +4450,7 @@
                 return;
               }
               if (ev.target.closest('#wipe-go')) {
+                mide('reinicio', true);
                 state.d = {};
                 state.n = {};
                 save();
@@ -4465,6 +4530,7 @@
              lo dejaste. */
           if (!cargado.def) pintarTour();
 
+          mide('tour-3d', true);
           marcarVuelta();
 
           if (typeof dlg.showModal === 'function') {
@@ -4604,8 +4670,12 @@
                 .getAttribute('data-add')
                 .split(',')
                 .forEach(function (c) {
-                  if (applies(c)) state.d[c] = 'si';
+                  if (applies(c)) {
+                    state.d[c] = 'si';
+                    mide('item-' + c + '-si', true);
+                  }
                 });
+              mideUnaVez('primera-decision');
               save();
               render();
               return;
@@ -4658,6 +4728,7 @@
               return;
             }
             if (ev.target.closest('#print')) {
+              mide('imprimio', true);
               window.print();
               return;
             }
@@ -4687,6 +4758,8 @@
             }
             if (ev.target.id === 'precio') {
               state.precio = parsePrecio(ev.target.value);
+              /* solo que lo puso: el valor no sale de este navegador */
+              if (state.precio) mideUnaVez('puso-precio');
               save();
               /* sin re-render: reventaria el foco y el cursor mientras escribe.
          Los porcentajes se refrescan al salir del campo. */
@@ -4740,10 +4813,12 @@
               state.tipo = parseInt(ev.target.value, 10);
               save();
               render();
+              mide('tipologia-' + state.tipo + '-' + state.piso, true);
             } else if (ev.target.id === 'sel-piso') {
               state.piso = parseInt(ev.target.value, 10);
               save();
               render();
+              mide('tipologia-' + state.tipo + '-' + state.piso, true);
             }
           });
 
@@ -4774,6 +4849,7 @@
           wireTour();
           wireDialogs();
           wireFab();
+          mide('/reformas-nature-bio/');
           /* Sin tema fijado seguimos al sistema, asi que el rotulo del boton
              se queda viejo si el sistema cambia solo. */
           if (window.matchMedia) {
@@ -4829,6 +4905,7 @@
               var w = document.getElementById('gate-w').value;
               hash(u + '\n' + w).then(function (h) {
                 if (h !== AUTH) {
+                  mide('puerta-fallida', true);
                   document.getElementById('gate-err').hidden = false;
                   document.getElementById('gate-w').value = '';
                   document.getElementById('gate-w').focus();
