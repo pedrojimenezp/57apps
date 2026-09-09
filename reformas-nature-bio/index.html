@@ -920,10 +920,6 @@
         font-size: 13.5px;
         line-height: 1.5;
       }
-      ul.mirar li .mirar-b {
-        flex: 0 0 auto;
-        align-self: center;
-      }
       .tours-note {
         margin: 16px 0 0;
         font-size: 13.5px;
@@ -1043,23 +1039,6 @@
         flex: 0 0 auto;
       }
 
-      /* chips de espacio: heredan el .seg button[aria-pressed] comun */
-      .tour-esp {
-        flex-wrap: wrap;
-      }
-      .tour-esp button {
-        padding: 8px 13px;
-        min-height: 38px;
-        font-size: 13.5px;
-      }
-      .tour-esp-lab {
-        font-family: 'IBM Plex Mono', ui-monospace, monospace;
-        font-size: 11px;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: var(--ink-3);
-        flex: 0 0 auto;
-      }
       .tour-reset {
         font-size: 13px;
         padding: 7px 12px;
@@ -1091,22 +1070,6 @@
           font-weight: 600;
           border-bottom: 1px solid var(--alert-edge);
         }
-      }
-      /* Salvedad del espacio que estas mirando. Ojo: NO puede copiar el
-   patron de .tour-warn, que esta display:none salvo bajo 820px; esta
-   nota tiene que verse en cualquier ancho. */
-      .tour-nota {
-        margin: 0;
-        padding: 10px 14px;
-        background: var(--quiza-soft);
-        color: var(--ink);
-        border-left: 3px solid var(--quiza);
-        border-bottom: 1px solid var(--line);
-        font-size: 13.5px;
-        line-height: 1.5;
-      }
-      .tour-nota b {
-        font-weight: 600;
       }
       /* Siempre dos columnas: ya no hay vistas individuales, el visor ES la
    comparacion. Bajo 820px se apilan. */
@@ -1187,34 +1150,6 @@
         text-transform: uppercase;
       }
 
-      /* boton "ver en 3D" dentro de cada item */
-      .b3d {
-        font-size: 13px;
-        padding: 8px 13px;
-        min-height: 38px;
-        border-color: var(--brand);
-        color: var(--brand);
-        background: var(--brand-soft);
-      }
-      .b3d:hover {
-        background: var(--brand);
-        color: var(--on-brand);
-        border-color: var(--brand);
-      }
-      /* boton de salto en la lista "que mirar en cada espacio" */
-      .mirar-b {
-        font-size: 12.5px;
-        padding: 6px 11px;
-        min-height: 34px;
-        border-color: var(--brand);
-        color: var(--brand);
-        background: transparent;
-      }
-      .mirar-b:hover {
-        background: var(--brand);
-        color: var(--on-brand);
-        border-color: var(--brand);
-      }
 
       /* Boton flotante: el acceso al visor que acompana al scroll. z-index por
    debajo del 30 de .tally; el dialogo va en el top layer y siempre gana. */
@@ -1898,13 +1833,6 @@
     <dialog id="tour" aria-labelledby="tour-h">
       <div class="tour-bar">
         <p class="tour-h" id="tour-h">Recorrido 3D · lado a lado</p>
-        <span class="tour-esp-lab" id="tour-esp-lab" hidden>Espacio</span>
-        <div
-          class="seg tour-esp"
-          id="tour-esp"
-          role="group"
-          aria-label="Saltar a un espacio"
-        ></div>
         <button type="button" class="btn tour-reset" id="tour-reset">
           Reiniciar
         </button>
@@ -1921,7 +1849,6 @@
         En esta pantalla los dos recorridos quedan uno debajo del otro. En
         pantalla grande se comparan mucho mejor.
       </p>
-      <p class="tour-nota" id="tour-nota" hidden></p>
       <div class="tour-panes" id="tour-panes">
         <div class="tour-pane" id="pane-def">
           <p class="pane-h">
@@ -2793,14 +2720,8 @@
             d: 'Cómo quedan los espacios con las mejoras de la lista.',
           },
         };
-        /* Sin ancla, la URL desnuda del modelo. Con ancla, la misma URL mas el
-   punto y el angulo (&play=1 evita el clic extra de arranque dentro del
-   iframe, que en un lado a lado hay que dar dos veces). */
-        function tourUrl(k, espKey) {
-          var u = 'https://my.matterport.com/show/?m=' + TOURS[k].m;
-          var a = espKey ? ancla(espKey, k) : null;
-          if (!a) return u;
-          return u + '&ss=' + a.ss + (a.sr ? '&sr=' + a.sr : '') + '&play=1';
+        function tourUrl(k) {
+          return 'https://my.matterport.com/show/?m=' + TOURS[k].m;
         }
 
         /* Pagina oficial del proyecto. Es la unica fuente real: esta pagina no
@@ -2809,25 +2730,28 @@
           'https://www.constructoracapital.com/proyecto/1/medellin-y-alrededores/sabaneta/197/nature-bio';
 
         /* ==============================================================
-   ANCLAS DE LOS RECORRIDOS  --  RELLENAR A MANO
+   ESPACIOS
 
-   Como sacar cada enlace:
-     1. Abre el recorrido en Matterport.
-     2. Camina hasta el espacio y dejalo mirando hacia lo que importa.
-     3. Compartir -> marca "enlace a esta ubicacion" -> copia.
-     4. Pega el enlace COMPLETO, tal cual, entre las comillas.
+   De aqui SOLO se usa hoy la lista "Que mirar en cada espacio": k, t y
+   mirar. Los campos def/mej/aviso estan DESCONECTADOS a proposito.
 
-   Queda algo asi:
-     def:"https://my.matterport.com/show/?m=iqH19cR3bgj&ss=19&sr=-3.05,.57",
+   Fueron de una version con un boton por espacio que saltaba a ese
+   punto del recorrido. Se retiro porque la unica forma de mover la
+   camara sin recargar es el Showcase SDK, que pide una applicationKey
+   detras de licencia; sin ella cada salto recargaba los dos iframes
+   enteros, que es peor que no tener el salto.
+
+   Las URLs se conservan porque capturarlas cuesta trabajo: son de
+   "Compartir -> enlace a esta ubicacion" dentro de cada recorrido, con
+   el punto (&ss=) y el angulo (&sr=).
 
      def = recorrido POR DEFECTO  (67,36 m2 - m=iqH19cR3bgj)
      mej = recorrido MEJORADO     (76,65 m2 - m=JVgLKjNcyVU)
 
-   Ojo: cada enlace tiene que venir de SU recorrido. Si el m= no
-   coincide, el ancla se ignora y la consola lo avisa al cargar.
-
-   Un espacio sin los DOS enlaces no muestra boton ni chip. La pagina
-   funciona igual, simplemente sin salto directo a ese espacio.
+   Para revivirlo hace falta volver a cablear: leer ss/sr de estas URLs
+   (validando que el m= sea el que toca), pintar un boton por item con
+   el mapa ESP_ITEM de abajo, unos chips en el visor, y mostrar `aviso`
+   al entrar en el espacio.
    ============================================================== */
         var ESPACIOS = [
           {
@@ -2877,70 +2801,12 @@
           },
         ];
 
-        /* --- lectura de las anclas -------------------------------------
-   El enlace pegado NO se usa como src. Se le sacan ss y sr y se
-   reconstruye la URL sobre nuestro propio m=: si alguien pega el
-   enlace del modelo equivocado, con src directo veriamos el
-   recorrido que no es sin ningun aviso. Asi se descarta y se avisa. */
-        var ANCLAS = {}; /* {espKey: {def:{ss,sr}, mej:{ss,sr}}} */
-
-        function parseAncla(url, k, espKey) {
-          if (!url) return null;
-          var m = /[?&]m=([^&]+)/.exec(url);
-          var ss = /[?&]ss=(\d+)/.exec(url);
-          var sr = /[?&]sr=([-\d.,]+)/.exec(url);
-          if (!m || m[1] !== TOURS[k].m) {
-            if (window.console)
-              console.warn(
-                'Ancla ignorada en ' +
-                  espKey +
-                  '.' +
-                  k +
-                  ': el enlace es de otro modelo (m=' +
-                  (m ? m[1] : '?') +
-                  ', se esperaba m=' +
-                  TOURS[k].m +
-                  ').',
-              );
-            return null;
-          }
-          if (!ss) {
-            if (window.console)
-              console.warn(
-                'Ancla ignorada en ' +
-                  espKey +
-                  '.' +
-                  k +
-                  ': el enlace no trae &ss=. Marca "enlace a esta ubicacion" al compartir.',
-              );
-            return null;
-          }
-          return { ss: ss[1], sr: sr ? sr[1] : '' };
-        }
-
-        function leerAnclas() {
-          var faltan = [];
-          for (var i = 0; i < ESPACIOS.length; i++) {
-            var E = ESPACIOS[i];
-            var a = {
-              def: parseAncla(E.def, 'def', E.k),
-              mej: parseAncla(E.mej, 'mej', E.k),
-            };
-            if (a.def && a.mej) ANCLAS[E.k] = a;
-            else faltan.push(E.k);
-          }
-          if (faltan.length && window.console) {
-            console.info(
-              'Espacios sin recorrido enlazado (rellena ESPACIOS en index.html): ' +
-                faltan.join(', '),
-            );
-          }
-        }
-        /* Que item se mira en que espacio. Un item, un espacio: los que tocan
-   dos (2.02 zocalo, 8.12 y 8.13 piso de zona social) apuntan al
-   principal y los chips del visor cubren el otro.
-   Los grupos 5 y 6, la zona de ropas, el calentador y la obra gris no
-   estan aqui a proposito: no cambian nada que se vea en un render. */
+        /* Mapa item -> espacio. DESCONECTADO, igual que def/mej de arriba:
+   se guarda para poder revivir los botones por espacio sin rehacerlo.
+   Un item, un espacio; los que tocan dos (2.02 zocalo, 8.12 y 8.13 piso
+   de zona social) apuntan al principal. Los grupos 5 y 6, la zona de
+   ropas, el calentador y la obra gris no estan a proposito: no cambian
+   nada que se vea en un render. */
         var ESP_ITEM = {
           cocina: ['3.01', '3.02', '8.12', '8.13', '8.17', '8.21'],
           bsocial: ['7.01', '8.05', '8.15'],
@@ -2960,38 +2826,6 @@
           ],
           social: ['3.03'],
         };
-        var ESP_DE = {}; /* codigo de item -> espacio */
-        (function () {
-          for (var k in ESP_ITEM) {
-            if (!ESP_ITEM.hasOwnProperty(k)) continue;
-            for (var i = 0; i < ESP_ITEM[k].length; i++)
-              ESP_DE[ESP_ITEM[k][i]] = k;
-          }
-        })();
-        /* Solo devuelve espacio si ademas hay enlaces: sin anclas no hay boton
-   que pintar. */
-        function espDeItem(c) {
-          var k = ESP_DE[c];
-          return k && anclaOK(k) ? k : null;
-        }
-
-        function anclaOK(espKey) {
-          return !!ANCLAS[espKey];
-        }
-        function ancla(espKey, k) {
-          return ANCLAS[espKey] ? ANCLAS[espKey][k] : null;
-        }
-        function espacioBy(espKey) {
-          for (var i = 0; i < ESPACIOS.length; i++)
-            if (ESPACIOS[i].k === espKey) return ESPACIOS[i];
-          return null;
-        }
-        function hayAnclas() {
-          for (var k in ANCLAS) {
-            if (ANCLAS.hasOwnProperty(k)) return true;
-          }
-          return false;
-        }
 
         var LS = 'nature-bio-reformas-v1';
         var DISCLAIM =
@@ -3015,14 +2849,14 @@
    preferencia de vista, y volver y encontrar media pagina plegada sin
    saber por que es peor que volver a plegarla. render() reemplaza el
    innerHTML entero, asi que tiene que salir de aqui o se perderia en
-   cada clic. */
+   cada clic.
+
+   TODO plegado de entrada: desplegado, la pagina son 34 items seguidos y
+   no hay forma de hacerse una idea de que hay. Plegada se ve el mapa
+   completo de un vistazo, con el resumen de cada seccion, y abres solo
+   lo que te interesa. "Expandir todo" sigue a un clic. */
         function abiertoPorDefecto() {
-          var o = {};
-          for (var i = 0; i < GROUPS.length; i++)
-            o[GROUPS[i].k] = GROUPS[i].kind === 'up';
-          o.entrega = true;
-          o.fuera = true;
-          return o;
+          return {};
         }
         function estaAbierto(k) {
           if (state.filtro !== 'todo')
@@ -3376,16 +3210,12 @@
             miss = missingNeeds(it);
           var cls =
             'item' + (it.neg ? ' neg' : '') + (blk.length ? ' blocked' : '');
-          /* data-esp en el articulo, no solo en su boton: es lo que lee el
-     observador del flotante para saber que espacio estas mirando. */
-          var espArt = espDeItem(it.c);
           var h =
             '<article class="' +
             cls +
             '" data-d="' +
             d +
             '"' +
-            (espArt ? ' data-esp="' + espArt + '"' : '') +
             ' id="it-' +
             it.c +
             '">';
@@ -3508,17 +3338,6 @@
               '</button>';
           }
           h += '</div>';
-          /* El salto al 3D no depende de si la tarjeta esta bloqueada: ver como
-     queda un espacio sigue siendo util aunque no puedas marcarlo. */
-          var esp3d = espDeItem(it.c);
-          if (esp3d) {
-            h +=
-              '<button type="button" class="btn b3d no-print" data-esp="' +
-              esp3d +
-              '">Ver ' +
-              esc(espacioBy(esp3d).t.toLowerCase()) +
-              ' en 3D</button>';
-          }
           h +=
             '<input class="note" type="text" data-c="' +
             it.c +
@@ -3767,23 +3586,12 @@
               '" target="_blank" rel="noopener">Abrir solo este en Matterport ↗</a>' +
               '</div></div>';
           });
-          /* La misma tabla ESPACIOS alimenta la lista y los chips del visor: si
-     estuvieran duplicadas se desincronizarian a la primera. */
+          /* Unico consumidor vivo de ESPACIOS: guia de que mirar, no saltos. */
           var mirar = '';
           for (var mi = 0; mi < ESPACIOS.length; mi++) {
             var EM = ESPACIOS[mi];
             mirar +=
-              '<li><b>' +
-              esc(EM.t) +
-              '</b><span>' +
-              EM.mirar +
-              '</span>' +
-              (anclaOK(EM.k)
-                ? '<button type="button" class="btn mirar-b no-print" data-esp="' +
-                  EM.k +
-                  '">Ver en 3D</button>'
-                : '') +
-              '</li>';
+              '<li><b>' + esc(EM.t) + '</b><span>' + EM.mirar + '</span></li>';
           }
           h +=
             '<div class="tours">' +
@@ -3800,11 +3608,7 @@
             '<button type="button" class="btn primary tboth-b" id="tboth" data-tour="both">' +
             (cargado.def ? 'Volver al recorrido' : 'Ver los dos lado a lado') +
             '</button>' +
-            '<span>' +
-            (hayAnclas()
-              ? 'Cada uno se navega por su cuenta, y desde adentro puedes saltar de un espacio al otro en los dos a la vez.'
-              : 'Cada uno se navega por su cuenta. Es la forma más directa de comparar.') +
-            '</span>' +
+            '<span>Cada uno se navega por su cuenta. Es la forma más directa de comparar.</span>' +
             '</div>' +
             '<p class="tours-sub">Qué mirar en cada espacio</p>' +
             '<ul class="mirar">' +
@@ -4142,7 +3946,6 @@
    iframe en display:none, asi que la escena se congela sola. Vaciar el
    src era lo que borraba la posicion dentro del recorrido cada vez que
    cerrabas. */
-        var tourEsp = null; /* espacio cargado ahora mismo, o null */
         var cargado = {
           def: '',
           mej: '',
@@ -4150,11 +3953,11 @@
 
         /* Solo toca el src si la URL cambia de verdad: volver al mismo espacio,
    o reabrir el visor, no debe recargar nada. */
-        function pintarTour(espKey) {
+        function pintarTour() {
           ['def', 'mej'].forEach(function (k) {
             var ifr = document.getElementById('tour-if-' + k);
             if (!ifr) return;
-            var url = tourUrl(k, espKey);
+            var url = tourUrl(k);
             if (cargado[k] === url) return;
             var frame = ifr.parentNode;
             if (frame) frame.setAttribute('data-load', '1');
@@ -4165,64 +3968,15 @@
           });
         }
 
-        /* Chips de espacio: solo los que tienen los dos enlaces puestos. */
-        function pintarChips() {
-          var box = document.getElementById('tour-esp');
-          var lab = document.getElementById('tour-esp-lab');
-          if (!box) return;
-          var h = '';
-          for (var i = 0; i < ESPACIOS.length; i++) {
-            var E = ESPACIOS[i];
-            if (!anclaOK(E.k)) continue;
-            h +=
-              '<button type="button" data-esp="' +
-              E.k +
-              '" aria-pressed="' +
-              (tourEsp === E.k) +
-              '">' +
-              esc(E.t) +
-              '</button>';
-          }
-          box.innerHTML = h;
-          box.hidden = !h;
-          if (lab) lab.hidden = !h;
-        }
-
-        /* Sin argumento = "abre lo que ya haya cargado". Es lo que hace el boton
-   general de la seccion de recorridos: si vuelves despues de cerrar, lo
-   ultimo que querrias es que te devolviera a la entrada del apartamento.
-   Con argumento = ve a ese espacio, y ahi si recarga, que es justo lo que
-   estas pidiendo. */
-        function abrirTour(espKey) {
+        function abrirTour() {
           var dlg = document.getElementById('tour');
           if (!dlg) return;
-          var suelto = arguments.length === 0;
-          if (espKey && !anclaOK(espKey)) espKey = null;
 
-          if (!cargado.def) {
-            /* primera apertura: los iframes estan vacios y hay que cargar algo */
-            tourEsp = suelto ? null : espKey;
-            pintarTour(tourEsp);
-          } else if (!suelto && espKey !== tourEsp) {
-            tourEsp = espKey;
-            pintarTour(tourEsp);
-          }
+          /* Solo la primera apertura carga: a partir de ahi los iframes no se
+             tocan nunca, que es lo que hace que el recorrido te espere donde
+             lo dejaste. */
+          if (!cargado.def) pintarTour();
 
-          var E = tourEsp ? espacioBy(tourEsp) : null;
-          document.getElementById('tour-h').textContent = E
-            ? 'En 3D · ' + E.t
-            : 'Recorrido 3D · lado a lado';
-
-          /* innerHTML porque el aviso lleva <b>, igual que mirar, up y los
-             flags. Saltar de espacio vuelve a pasar por aqui, asi que la nota
-             aparece y desaparece sola. */
-          var nota = document.getElementById('tour-nota');
-          if (nota) {
-            nota.innerHTML = E && E.aviso ? E.aviso : '';
-            nota.hidden = !(E && E.aviso);
-          }
-
-          pintarChips();
           marcarVuelta();
 
           if (typeof dlg.showModal === 'function') {
@@ -4243,19 +3997,14 @@
    El acceso al visor que acompana al scroll: la lista es larga y los
    accesos generales viven arriba del todo.
 
-   Dos observadores. Uno decide SI se ve: mientras la seccion de
-   recorridos este en pantalla sobra, porque su propio boton hace el
-   trabajo. El otro decide QUE dice: mira que item cruza la franja
-   central y contextualiza la etiqueta.
+   Un observador decide si se ve: mientras la seccion de recorridos este
+   en pantalla sobra, porque su propio boton hace el trabajo.
 
-   Los dos apuntan a nodos de dentro de #app, asi que render() los deja
-   huerfanos y hay que rehacerlos. De ahi el disconnect() al empezar: sin
-   el se acumularia un par por cada clic de decision. */
-        var obsTours = null,
-          obsItems = null;
+   Apunta a un nodo de dentro de #app, asi que render() lo deja huerfano
+   y hay que rehacerlo. De ahi el disconnect() al empezar: sin el se
+   acumularia uno por cada clic de decision. */
+        var obsTours = null;
         var fabPasado = false; /* ya pasamos la seccion de recorridos */
-        var fabEsp = null; /* espacio del item que tienes delante */
-        var fabVistos = []; /* items dentro de la franja, en orden de entrada */
 
         function fabEl() {
           return document.getElementById('fab');
@@ -4269,24 +4018,14 @@
           b.hidden = !ver;
           b.setAttribute('data-in', ver ? '1' : '0');
 
-          var E = fabEsp ? espacioBy(fabEsp) : null;
-          document.getElementById('fab-t').textContent = E
-            ? 'Ver ' + E.t.toLowerCase() + ' en 3D'
-            : cargado.def
-              ? 'Volver al 3D'
-              : 'Ver en 3D';
+          document.getElementById('fab-t').textContent = cargado.def
+            ? 'Volver al 3D'
+            : 'Ver en 3D';
         }
 
         function observarFab() {
           if (typeof IntersectionObserver !== 'function') return;
           if (obsTours) obsTours.disconnect();
-          if (obsItems) obsItems.disconnect();
-          /* fabVistos si se limpia (apunta a nodos que render() acaba de tirar),
-     pero fabEsp NO: el observador nuevo dispara su primer callback en el
-     siguiente tick, y vaciarlo aqui haria parpadear la etiqueta a
-     generica en cada clic de decision. Si el item ya no existe, ese
-     primer callback lo corrige solo. */
-          fabVistos = [];
 
           var tours = document.querySelector('.tours');
           if (tours) {
@@ -4302,44 +4041,13 @@
             });
             obsTours.observe(tours);
           }
-
-          var items = document.querySelectorAll('#app .item[data-esp]');
-          if (items.length) {
-            /* La franja es el 10% central de la pantalla: sin acotarla, con la
-       lista entera "visible" a la vez la etiqueta saltaria sin sentido. */
-            obsItems = new IntersectionObserver(
-              function (es) {
-                for (var i = 0; i < es.length; i++) {
-                  var k = es[i].target.getAttribute('data-esp');
-                  var at = fabVistos.indexOf(k);
-                  if (es[i].isIntersecting) {
-                    if (at < 0) fabVistos.push(k);
-                  } else if (at >= 0) {
-                    fabVistos.splice(at, 1);
-                  }
-                }
-                /* el ultimo en entrar manda */
-                fabEsp = fabVistos.length
-                  ? fabVistos[fabVistos.length - 1]
-                  : null;
-                pintarFab();
-              },
-              { rootMargin: '-45% 0px -45% 0px', threshold: 0 },
-            );
-            for (var i = 0; i < items.length; i++) obsItems.observe(items[i]);
-          }
           pintarFab();
         }
 
         function wireFab() {
           var b = fabEl();
           if (!b) return;
-          b.addEventListener('click', function () {
-            /* Sin espacio a la vista se abre "suelto", que respeta donde
-       estabas; con espacio se va a ese espacio. */
-            if (fabEsp) abrirTour(fabEsp);
-            else abrirTour();
-          });
+          b.addEventListener('click', abrirTour);
         }
 
         /* Cerrar NO descarga nada: esa es toda la gracia. */
@@ -4355,16 +4063,10 @@
           if (!dlg) return;
 
           dlg.addEventListener('click', function (ev) {
-            var chip = ev.target.closest('[data-esp]');
-            if (chip) {
-              abrirTour(chip.getAttribute('data-esp'));
-              return;
-            }
             if (ev.target.closest('#tour-reset')) {
-              /* La salida si dos escenas WebGL vivas ponen lento el navegador:
-         los vuelve a cargar donde estaban. */
+              /* La salida si dos escenas WebGL vivas ponen lento el navegador. */
               cargado = { def: '', mej: '' };
-              pintarTour(tourEsp);
+              pintarTour();
               return;
             }
             if (ev.target.closest('#tour-x')) cerrarTour();
@@ -4418,13 +4120,6 @@
                 });
               save();
               render();
-              return;
-            }
-            /* Va despues de la rama de .seg button[data-c]: el boton 3D no
-       lleva data-c, asi que no se pisan. */
-            var e3 = ev.target.closest('[data-esp]');
-            if (e3) {
-              abrirTour(e3.getAttribute('data-esp'));
               return;
             }
             var tt = ev.target.closest('[data-tour]');
@@ -4591,7 +4286,6 @@
           arrancado = true;
           var av = document.querySelector('.alert');
           if (av) av.hidden = false;
-          leerAnclas(); /* antes de render(): decide que items llevan boton 3D */
           load();
           render();
           wire();
