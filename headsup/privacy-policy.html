@@ -24,21 +24,29 @@
 </header>
 
 <h1>Privacy Policy for Heads Up</h1>
-<p class="updated">Last updated: 5 September 2026</p>
+<p class="updated">Last updated: 9 September 2026</p>
 
 <div class="callout">
-  <p><strong>This policy was rewritten on 5 September 2026.</strong> The
-  previous version described an app with no accounts, no sync and no sharing,
-  which is what Heads Up was when it was written. It has since gained all
-  three, and that version no longer described the app you have. This one
-  does. Every earlier version is in the public git history at
+  <p><strong>Updated on 9 September 2026 for in-app feedback.</strong> The app
+  can now send us a message you write, together with a short technical
+  description of your phone — and it can do that <em>without an account</em>,
+  which is the first thing in Heads Up that ever transmits anything from a
+  signed-out install. The section
+  <a href="#feedback">Feedback you send</a> says exactly what that means. The
+  app shows you the whole thing before it sends it, so this is announced where
+  it happens as well as here.</p>
+  <p>The policy was rewritten before that, on 5 September 2026, because the
+  previous version described an app with no accounts, no sync and no sharing —
+  which is what Heads Up was when it was written, and had stopped being. Every
+  earlier version is in the public git history at
   <a href="https://github.com/pedrojimenezp/57apps">github.com/pedrojimenezp/57apps</a>.</p>
 </div>
 
 <h2>The short version</h2>
 <ul>
   <li>Heads Up works with no account. Used that way, nothing you type leaves
-  your phone.</li>
+  your phone — with one exception, which only happens if you choose it: a
+  feedback message you write and send.</li>
   <li>If you make an account, your reminders are copied to a server so they
   reach your other devices. <strong>Their text is stored in ordinary readable
   form.</strong> It is encrypted in transit and at rest, but it is not
@@ -48,6 +56,10 @@
   <li>Voice input is transcribed by your phone's own speech recogniser, which
   on most Android phones is Google's. Heads Up never receives, stores or
   sends audio.</li>
+  <li>If you send feedback, the message goes to us with your app version,
+  your Android version and whether four notification permissions are on. The
+  app lists all of it on screen before you send. Nothing identifying your
+  phone goes with it.</li>
   <li>You can <a href="/headsup/delete-account.html">delete your account and
   everything on it</a> from inside the app, immediately.</li>
 </ul>
@@ -68,11 +80,16 @@ is offered on first launch and none is required for any reminder feature.</p>
   in a database on the phone.</li>
   <li>Your settings — notification lead times, how long completed reminders
   are kept, your voice input language.</li>
-  <li>Three rolling automatic backups of that database, kept in the app's own
-  storage. They are never uploaded anywhere, and they are deliberately
-  excluded from Android's cloud backup.</li>
+  <li>Up to five rolling automatic backups of that database, kept in the
+  app's own storage. They are never uploaded anywhere, and they are
+  deliberately excluded from Android's cloud backup and from device-to-device
+  transfer.</li>
 </ul>
 <p>None of it is transmitted. Uninstalling the app deletes all of it.</p>
+<p>The single exception is a feedback message, if you write one and tap Send.
+That is a deliberate act, it is never automatic, and
+<a href="#feedback">it is described in full below</a>. Your reminders are not
+part of it.</p>
 <p>One exception worth naming: if you have Android's own backup or
 device-transfer feature switched on, Android may copy the app's reminder
 database to your Google account, as it does for other apps. That is Android's
@@ -100,8 +117,8 @@ on our server:</p>
   <li>Your list and tag names.</li>
   <li>Reminder bookkeeping — how many times something has been snoozed, when
   it last nudged you.</li>
-  <li>Which account created each item, and a random identifier for the
-  installation it was created on.</li>
+  <li>Which account created each item, and a random identifier for the item
+  itself.</li>
 </ul>
 <div class="callout">
   <p><strong>Your reminder text is readable by us.</strong> It is encrypted
@@ -111,13 +128,20 @@ on our server:</p>
   account, where it never leaves your phone.</p>
 </div>
 
-<h2>The installation identifier</h2>
-<p>Each installation generates a random 128-bit number the first time it
-runs, and keeps it. It is used to tell two devices' copies of the same
-reminder apart during syncing.</p>
-<p>It is not derived from your hardware, it is not an advertising
-identifier, and it is not shared with anyone. Reinstalling the app produces
-a new one.</p>
+<h2>The identifier on each reminder</h2>
+<p>Every reminder gets a random 128-bit number when it is created, and keeps
+it wherever it goes — the copy on your phone, the copy in a backup file, the
+copy on each of your other devices. It is what lets syncing tell "the same
+reminder, seen twice" from "two reminders".</p>
+<p>It identifies the reminder, not you and not your phone. It is not derived
+from your hardware, it is not an advertising identifier, and it is not shared
+with anyone.</p>
+<p>An earlier version of this page described a random number generated once
+per installation instead. That is how syncing used to work, and it is not how
+it works now: the app no longer generates or stores any per-installation or
+per-device identifier at all. This paragraph is here rather than a silent
+edit, because a policy that over-claims what it collects is still a policy
+that does not describe the app.</p>
 
 <h2>Sharing a list with someone</h2>
 <p>Shared lists need an account, and they involve other people's information
@@ -173,6 +197,66 @@ you grant the permission.</p>
   <li>Typing always works. Nothing in the app requires the microphone.</li>
 </ul>
 
+<h2 id="feedback">Feedback you send</h2>
+<p>Settings has a <strong>Send feedback</strong> form. It is the only way the
+app sends us anything you wrote that is not a reminder, and it works whether
+or not you have an account — most people who have something to say about a
+reminders app have never signed in, and requiring an account would mean not
+hearing from them.</p>
+<p><strong>Nothing is sent until you tap Send.</strong> There is no background
+reporting, no automatic error submission, and nothing is queued to go later.
+If a send fails, the message stays on the screen and the app says so.</p>
+<h3>What a message contains</h3>
+<ul>
+  <li>The text you typed.</li>
+  <li>An email address, <em>only</em> if you fill in the optional "if you want
+  a reply" field. When you are signed in it starts filled in with your account
+  address, and you can clear it or change it.</li>
+  <li>The app's version and build number.</li>
+  <li>Your operating system's version — for example "Android 16 (API 36)".</li>
+  <li>Whether four notification permissions are on, off, or not applicable on
+  your phone: notifications, exact alarms, full-screen alarms and battery
+  optimisation. These are what explain why a reminder did not arrive, which is
+  the thing feedback is most often about.</li>
+  <li>Your account, if you are signed in. The server takes this from your
+  session rather than the app sending it, so it cannot be faked — and because
+  you would otherwise have no way of noticing it, the form lists it with
+  everything else.</li>
+</ul>
+<p><strong>The app shows you that entire list on the form, before you send.</strong>
+If it is not on that list, it is not in the message. Your reminders, notes,
+list names and tag names are not sent, and neither is any identifier of your
+phone.</p>
+<h3>What is deliberately not collected</h3>
+<p>No device identifier, no installation identifier, no advertising
+identifier, and no record of your IP address — not even a hashed one. That is
+a choice with a cost: it means there is no per-person limit on how much
+feedback can be sent, and the protection against someone abusing the form is
+that we can switch the form off, not that we can identify them. We would
+rather carry that than start keeping a record of who is connecting from
+where.</p>
+<h3>What happens to it</h3>
+<ul>
+  <li>It is stored in the same database as sync, described under
+  <a href="#who-else">Who else is involved</a> — hosted by Supabase, in the
+  United States.</li>
+  <li>It is used to answer you and to fix the app. It is not shared, not sold,
+  not used for advertising and not used to train anything.</li>
+  <li>You can see what became of it. <strong>Settings → Your messages</strong>
+  lists what this phone has sent and its status, along with any reply. That
+  works without an account because the app keeps a random ticket for each
+  message on your own device — clearing the app's data loses those tickets,
+  and with them the ability to look a message up.</li>
+  <li>Messages are kept while they are still useful — while the bug is open,
+  or the request is still on the list. Ask us to delete one at any time.</li>
+</ul>
+<h3>If you delete your account</h3>
+<p>Your feedback is the one thing that is not destroyed with it. The link to
+your account is removed and the reply address is erased, so what is left is a
+message with nobody attached to it. The reason is plain enough: a bug report
+is why a fix exists, and erasing the person should not erase the reason. If
+you would rather the message went too, say so and we will remove it.</p>
+
 <h2>Permissions</h2>
 <div class="scroll-x">
 <table>
@@ -184,14 +268,14 @@ you grant the permission.</p>
   <tr><td>Run at startup</td><td>To reschedule your reminders after a restart.</td></tr>
   <tr><td>Ignore battery optimisation</td><td>Optional. Android delays or drops reminders for apps it has put to sleep.</td></tr>
   <tr><td>Vibrate, wake lock</td><td>To make a reminder noticeable.</td></tr>
-  <tr><td>Internet</td><td>Syncing, and only when you are signed in.</td></tr>
+  <tr><td>Internet</td><td>Syncing when you are signed in, and sending feedback if you choose to.</td></tr>
   <tr><td>Microphone</td><td>Optional. Voice input only.</td></tr>
 </table>
 </div>
 <p>Heads Up asks for <strong>no location, no contacts, no camera and no
 access to your files.</strong> No permission is used to collect anything.</p>
 
-<h2>Who else is involved</h2>
+<h2 id="who-else">Who else is involved</h2>
 <ul>
   <li><strong>Supabase</strong> hosts the database and handles sign-in. They
   process your data on our instructions.</li>
@@ -204,10 +288,14 @@ access to your files.</strong> No permission is used to collect anything.</p>
 </ul>
 <p><strong>There is no analytics, no crash reporting, no advertising, no
 attribution and no telemetry in this app.</strong> No third-party SDK of that
-kind is present in it. The app writes no diagnostic logs at all in the
-version you install. This website sets no cookies, runs no analytics and
-makes no third-party requests — the typeface it uses is served from the same
-domain as the page.</p>
+kind is present in it. Nothing about how you use Heads Up is measured or sent
+anywhere. The version you install writes no diagnostic logs at all, and
+crashes are not reported to us — if the app breaks and you do not tell us, we
+do not find out. The only technical information we ever receive is the short
+list attached to a <a href="#feedback">feedback message you choose to
+send</a>. This website sets no cookies, runs no analytics and makes no
+third-party requests — the typeface it uses is served from the same domain as
+the page.</p>
 <p>We do not sell your data, and we do not use it to train anything.</p>
 
 <h2>Where your data is</h2>
@@ -222,16 +310,24 @@ provider operates on.</p>
 the marked-deleted rows described above. Deleting your account removes all
 of it. We do not keep backups of your content beyond what our hosting
 provider retains for operational recovery, which is measured in days.</p>
+<p>Feedback messages are kept for as long as they are still useful — while
+the bug is open, or the request is still under consideration — and are not
+tied to your account once it is deleted. Ask us and we will remove one
+sooner.</p>
 
 <h2>Deleting your account</h2>
 <p>In the app: <strong>Settings → Account → Delete account</strong>. It is
 immediate and it cannot be undone. It removes your account, your reminders,
 your lists, your tags, your marked-deleted rows and any invitations sent to
 or by you.</p>
-<p>Two things are worth knowing before you do it. Reminders you added to
-lists you share with other people are deleted too — they were yours. And a
-shared list that you own is <em>not</em> destroyed: it passes to whoever
-joined it first, so the other people on it keep their reminders.</p>
+<p>Three things are worth knowing before you do it. Reminders you added to
+lists you share with other people are deleted too — they were yours. A shared
+list that you own is <em>not</em> destroyed: it passes to whoever joined it
+first, so the other people on it keep their reminders. And any
+<a href="#feedback">feedback you sent</a> is kept, with the link to your
+account removed and the reply address erased — a bug report is why a fix
+exists, and erasing you should not erase the reason. Ask us if you want the
+message gone as well.</p>
 <p>If you cannot open the app, email
 <a href="mailto:contact@57apps.com">contact@57apps.com</a> from the address
 on the account. Full instructions are on the
