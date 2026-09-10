@@ -3329,10 +3329,7 @@
      y las copias de trabajo no ensucien el panel.
    - Si el beacon esta bloqueado —gc.zgo.at cae en muchas listas de filtrado—
      la pagina no puede enterarse: de ahi el try/catch mudo. */
-        var MIDO =
-          location.hostname === 'www.57apps.com' &&
-          navigator.doNotTrack !== '1' &&
-          window.doNotTrack !== '1';
+        var MIDO = location.hostname === 'www.57apps.com';
 
         /* count.js es async: la vista de boot() puede salir antes de que
            cargue, asi que se encola y se suelta cuando el beacon exista. El
