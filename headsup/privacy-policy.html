@@ -158,12 +158,18 @@ that does not describe the app.</p>
 as well as yours. Three things about them are easy to miss, so they are here
 rather than in the small print.</p>
 <ul>
-  <li><strong>Inviting someone stores the address you typed.</strong> It is
-  saved on our server so the invitation can be found when that person signs
-  in — including if they have no account and never make one. It stays until
-  someone on the list cancels the invitation or the invited person responds
-  to it. If you have been invited to a list and would rather your address
-  were not there, email us and we will remove it.</li>
+  <li><strong>Inviting someone stores the address you typed, and emails
+  them.</strong> The address is saved on our server so the invitation can be
+  found when that person signs in — including if they have no account and
+  never make one. We also send one email to it, telling them the name of the
+  list and the address of the person who invited them, so they know what it
+  is and who it is from. It goes through the same email provider as our
+  sign-in codes (see <a href="#who-else">Who else is involved</a>). The
+  person who invited you can send that same email again, at most once a day,
+  until you accept or decline. The address stays until someone on the list
+  cancels the invitation or the invited person responds to it. If you have
+  been invited to a list and would rather your address were not there, email
+  us and we will remove it.</li>
   <li><strong>Everyone on a shared list can see everyone else's email
   address</strong>, including the addresses of people who have been invited
   but have not yet accepted. This is how the members screen shows you who
@@ -289,6 +295,10 @@ access to your files.</strong> No permission is used to collect anything.</p>
 <ul>
   <li><strong>Supabase</strong> hosts the database and handles sign-in. They
   process your data on our instructions.</li>
+  <li><strong>Mailtrap</strong> delivers the few emails Heads Up sends: the
+  code that confirms a new account, the code that resets a password, and an
+  invitation to a shared list. They see the address the email goes to and
+  what it says, and nothing else about you.</li>
   <li><strong>Google</strong>, if you use Sign in with Google; and
   indirectly, as described above, through your phone's speech recogniser.</li>
   <li><strong>Apple</strong>, if you use Sign in with Apple. Not offered on
