@@ -24,9 +24,22 @@
 </header>
 
 <h1>Privacy Policy for Heads Up</h1>
-<p class="updated">Last updated: 11 September 2026</p>
+<p class="updated">Last updated: 13 September 2026</p>
 
 <div class="callout">
+  <p><strong>Updated on 13 September 2026:</strong> three things. The list of
+  <a href="#when-you-sign-in">what a reminder carries to the server</a> now
+  names everything it should have: whether a date is an appointment or a plan,
+  how many times a reminder has been moved to another day, its per-reminder
+  notification choices, and its position in the list — the first two are new
+  in the app this week, the rest were always sent and should have been listed.
+  Two sentences were wrong and are corrected below: the "keep completed
+  reminders" setting <em>does</em> remove old completed reminders from your
+  account, not only from the phone (the app's own Settings said the reverse
+  too, and now says this); and marked-deleted reminders are cleared from the
+  server by a nightly job thirty days after you delete them, rather than
+  staying until you delete your account. Both corrections mean less is kept,
+  not more.</p>
   <p><strong>Updated on 11 September 2026:</strong> lists now carry one of
   five colours, and a list's colour syncs along with its name, so it is named
   in <a href="#when-you-sign-in">what is stored on the server</a>. It is a
@@ -93,11 +106,13 @@ is offered on first launch and none is required for any reminder feature.</p>
 <ul>
   <li>Your lists, reminders, notes, tags, due dates and completion history,
   in a database on the phone.</li>
-  <li>Your settings — notification lead times, how long completed reminders
-  are kept, your voice input language.</li>
-  <li>Up to five rolling automatic backups of that database, kept in the
-  app's own storage. They are never uploaded anywhere. They live inside the
-  app, so removing the app removes them too.</li>
+  <li>Your settings — notification lead times and how often a reminder
+  repeats itself, whether the app asks you in the evening to plan tomorrow,
+  how long completed reminders are kept, your voice input language, and your
+  colour palette and light or dark choice.</li>
+  <li>Up to five rolling automatic backups of your reminders and lists, kept
+  in the app's own storage. They are never uploaded anywhere. They live inside
+  the app, so removing the app removes them too.</li>
 </ul>
 <p>None of it is transmitted. Uninstalling the app deletes all of it.</p>
 <p>The single exception is a feedback message, if you write one and tap Send.
@@ -128,12 +143,18 @@ on our server:</p>
 <h3>Your reminders</h3>
 <ul>
   <li>The text of each reminder and its notes.</li>
-  <li>Due dates and times, and the timezone the due date was set in.</li>
-  <li>Priority, repeat rules, completion state and times.</li>
+  <li>Due dates and times, the timezone the due date was set in, and whether
+  the date is an appointment or a plan.</li>
+  <li>Priority, repeat rules, completion state and times, and where you have
+  placed it in the list.</li>
+  <li>How you asked to be reminded of it — whether it rings like an alarm,
+  whether it keeps nudging until done, or whether it should stay quiet.</li>
   <li>Your list and tag names, and which of the app's five list colours each
   list wears.</li>
-  <li>Reminder bookkeeping — how many times something has been snoozed, when
-  it last nudged you.</li>
+  <li>Reminder bookkeeping — how many times something has been snoozed, how
+  many times it has been moved to another day, how many nudges it has had
+  today, when it last nudged you and when it will next, and whether it was
+  typed or spoken.</li>
   <li>Which account created each item, and a random identifier for the item
   itself.</li>
 </ul>
@@ -193,13 +214,17 @@ rather than in the small print.</p>
 <p>It disappears from your devices immediately. On the server the row is
 marked as deleted rather than removed, because that is how your other
 devices find out it is gone. <strong>Its text stays on the server in that
-state.</strong> Nothing removes those marked-deleted rows automatically
-today; deleting your account removes them.</p>
+state for up to thirty days.</strong> A job runs every night and removes
+marked-deleted rows once they are thirty days old; deleting your account
+removes them at once.</p>
 <h3>The "keep completed reminders" setting</h3>
 <p>Your choice of 30 days, 90 days or forever removes old completed
-reminders <strong>from that device</strong>. If you are signed in, it does
-not delete the server's copy. We would rather say that plainly than let the
-setting imply something it does not do.</p>
+reminders. If you are signed in, that removal is sent to the server too, so
+the reminder leaves your account and your other devices as well as the phone
+it was purged from — it is marked deleted there, and cleared by the nightly
+job above. An earlier version of this page said the server's copy was left
+alone. It was not, and the app's own Settings screen said the same wrong
+thing; both now say this.</p>
 
 <h2>Voice input</h2>
 <p>The microphone is used only while you have voice input open, and only if

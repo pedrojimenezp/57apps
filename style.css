@@ -164,6 +164,29 @@ th {
   overflow-x: auto;
 }
 
+/* The store screenshots, as a strip that scrolls sideways. Eight portrait
+ * frames in a 42rem column would otherwise be a page of thumbnails; a strip
+ * keeps each one large enough to read. The images are same-origin WebP,
+ * downscaled from the store composites, so the site still loads nothing
+ * from anyone else. */
+.shots {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 0.75rem;
+  margin: 0 0 1rem;
+}
+
+.shots img {
+  flex: none;
+  width: 13.5rem;
+  height: auto;
+  border-radius: 14px;
+  border: 1px solid var(--edge);
+  scroll-snap-align: start;
+}
+
 header.site {
   display: flex;
   align-items: center;
