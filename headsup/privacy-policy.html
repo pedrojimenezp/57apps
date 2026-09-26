@@ -24,9 +24,15 @@
 </header>
 
 <h1>Privacy Policy for Heads Up</h1>
-<p class="updated">Last updated: 23 September 2026</p>
+<p class="updated">Last updated: 26 September 2026</p>
 
 <div class="callout">
+  <p><strong>Updated on 26 September 2026:</strong> the section on signing in
+  now says that Sign in with Google also passes on the name and profile-picture
+  link on your Google account, which this page previously left out. The app
+  also no longer asks for the full-screen and battery-optimisation
+  permissions, so both are gone from the permissions table. Nothing new is
+  collected.</p>
   <p><strong>Updated on 23 September 2026:</strong> the list of settings kept
   on your device now names the morning and evening summary times the app
   added. They stay on the phone like every other setting; nothing new is
@@ -95,7 +101,7 @@
   on most Android phones is Google's. Heads Up never receives, stores or
   sends audio.</li>
   <li>If you send feedback, the message goes to us with your app version,
-  your Android version and whether four notification permissions are on. The
+  your Android version and whether three notification permissions are on. The
   app lists all of it on screen before you send. Nothing identifying your
   phone goes with it.</li>
   <li>You can <a href="/headsup/delete-account.html">delete your account and
@@ -146,9 +152,13 @@ on our server:</p>
 <h3>Your identity</h3>
 <ul>
   <li>Your email address.</li>
-  <li>If you signed in with Google or Apple, that provider tells us your
-  email address and gives us an account identifier. We do not receive your
-  password, your contacts, or anything else from them.</li>
+  <li>If you signed in with Google, Google tells us your email address, an
+  account identifier, and the name and profile-picture link on your Google
+  account. Our authentication provider stores those with your account; the app
+  does not show or use the name or picture. If you signed in with Apple, Apple
+  tells us your email address (or a private relay address) and an account
+  identifier. We do not receive your password, your contacts, or anything else
+  from either of them.</li>
   <li>A password, if you made one — stored only as a hash, by our
   authentication provider, never in readable form.</li>
 </ul>
@@ -274,9 +284,8 @@ If a send fails, the message stays on the screen and the app says so.</p>
   address, and you can clear it or change it.</li>
   <li>The app's version and build number.</li>
   <li>Your operating system's version — for example "Android 16 (API 36)".</li>
-  <li>Whether four notification permissions are on, off, or not applicable on
-  your phone: notifications, exact alarms, full-screen alarms and battery
-  optimisation. These are what explain why a reminder did not arrive, which is
+  <li>Whether three notification permissions are on, off, or not applicable on
+  your phone: notifications, exact alarms and battery optimisation. These are what explain why a reminder did not arrive, which is
   the thing feedback is most often about.</li>
   <li>Your account, if you are signed in. The server takes this from your
   session rather than the app sending it, so it cannot be faked — and because
@@ -323,10 +332,8 @@ you would rather the message went too, say so and we will remove it.</p>
   <tr><th>Permission</th><th>Why</th></tr>
   <tr><td>Notifications</td><td>To show your reminders.</td></tr>
   <tr><td>Exact alarms</td><td>So a reminder fires at the time you set rather than whenever the system gets round to it.</td></tr>
-  <tr><td>Full-screen intent</td><td>So an alarm-style reminder can show over the lock screen.</td></tr>
   <tr><td>Foreground service</td><td>For the summary notification that stays put.</td></tr>
   <tr><td>Run at startup</td><td>To reschedule your reminders after a restart.</td></tr>
-  <tr><td>Ignore battery optimisation</td><td>Optional. Android delays or drops reminders for apps it has put to sleep.</td></tr>
   <tr><td>Vibrate, wake lock</td><td>To make a reminder noticeable.</td></tr>
   <tr><td>Internet</td><td>Syncing when you are signed in, and sending feedback if you choose to.</td></tr>
   <tr><td>Microphone</td><td>Optional. Voice input only.</td></tr>
