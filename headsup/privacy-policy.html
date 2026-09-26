@@ -31,8 +31,10 @@
   now says that Sign in with Google also passes on the name and profile-picture
   link on your Google account, which this page previously left out. The app
   also no longer asks for the full-screen and battery-optimisation
-  permissions, so both are gone from the permissions table. Nothing new is
-  collected.</p>
+  permissions, so both are gone from the permissions table. And on a list you
+  share, the "keep completed reminders" setting now clears old completed
+  reminders from your device only, rather than from everyone's. Nothing new
+  is collected.</p>
   <p><strong>Updated on 23 September 2026:</strong> the list of settings kept
   on your device now names the morning and evening summary times the app
   added. They stay on the phone like every other setting; nothing new is
@@ -241,12 +243,14 @@ marked-deleted rows once they are thirty days old; deleting your account
 removes them at once.</p>
 <h3>The "keep completed reminders" setting</h3>
 <p>Your choice of 30 days, 90 days or forever removes old completed
-reminders. If you are signed in, that removal is sent to the server too, so
-the reminder leaves your account and your other devices as well as the phone
-it was purged from — it is marked deleted there, and cleared by the nightly
-job above. An earlier version of this page said the server's copy was left
-alone. It was not, and the app's own Settings screen said the same wrong
-thing; both now say this.</p>
+reminders. If you are signed in and the reminder is on a list only you use,
+that removal is sent to the server too, so the reminder leaves your account
+and your other devices as well as the phone it was purged from — it is marked
+deleted there, and cleared by the nightly job above. On a list you share with
+other people, the removal stays on your device: each member chooses how long
+they keep completed reminders, so your setting does not delete history other
+members may want. That server copy is removed when the person who added it,
+or the list's owner, deletes it, or when the list is deleted.</p>
 
 <h2>Voice input</h2>
 <p>The microphone is used only while you have voice input open, and only if
